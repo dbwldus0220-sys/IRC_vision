@@ -1,0 +1,32 @@
+{
+  "changed_files": [
+    "artifacts/AGENTS.md",
+    "artifacts/robot_motions_pc.json",
+    "artifacts/robot_motions_runtime.json",
+    "external_sdk/gui_aligned/robot_motion_player.cpp",
+    "external_sdk/gui_aligned/test_ball_fine_queue.cpp",
+    "external_sdk/gui_aligned/test_forward_timing.cpp",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "src/mission_control/README.md",
+    "src/mission_control/mission_control/motion_command_bridge_node.py",
+    "src/mission_control/mission_control/motion_decision_node.py",
+    "src/mission_control/test/test_final_forward106.py",
+    "src/mission_control/test/test_forward_recovery_speed105.py",
+    "src/mission_control/test/test_motion_command_bridge.py",
+    "src/mission_control/test/test_pickup_prepare105.py"
+  ],
+  "focused_pytest": "100 passed",
+  "catalog_validation": "168 unique motions; aliases resolve; motor IDs 0..22",
+  "regression_comparison": {
+    "baseline_failed": 185,
+    "updated_failed": 184,
+    "new_failures": [],
+    "resolved_failures": [
+      "test.test_motion_decision_node::test_mission_progress_contains_exact_fields_and_values"
+    ]
+  },
+  "hardware_executed": false,
+  "build": "colcon: irc_step_motion_executor and mission_control succeeded",
+  "sdk_ctest": "8/8 passed (including final-forward repeats and mixed-transition rejection checks)",
+  "production_catalog_timing_replay": "passed (test_forward_timing with runtime catalog; exit 0)"
+}

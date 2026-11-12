@@ -4034,8 +4034,10 @@ def test_section_progress_is_capped_at_requirement():
 def test_mission_progress_contains_exact_fields_and_values():
     """Expose success scores and course progress in command JSON shape."""
     node = FakeDecisionNode()
-    complete_motion(node, 'PICKUP_NOW', event_id=514)
-    complete_motion(node, 'SHOT', event_id=515)
+    for action, command_id in (("PICKUP_NOW", 514), ("SHOT", 515)):
+        assert node.phase_manager.start_special_action(action, command_id)
+        node.phase_manager.handle_motion_status(action, command_id, "RUNNING")
+        node.phase_manager.handle_motion_status(action, command_id, "SUCCEEDED")
 
     progress = MotionDecisionNode._mission_progress(node)
 
@@ -4052,13 +4054,17 @@ def test_mission_progress_contains_exact_fields_and_values():
         'shots_completed': 1,
         'required_shots': 2,
         'hurdles_completed': 0,
-        'required_hurdles': 2,
+        'required_hurdles': 3,
         'ball_sections_processed': 1,
         'required_ball_sections': 2,
         'finish_enabled': False,
         'mission_complete': False,
         'ball_1_grasp_result': 'UNKNOWN',
         'ball_2_grasp_result': 'UNKNOWN',
+        'finish_run_armed': False,
+        'finish_run_latched': False,
+        'finish_run_fault': None,
+        'finish_forward_batches_completed': 0,
     }
 
 

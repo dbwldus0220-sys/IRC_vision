@@ -1,0 +1,61 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  9: test_catalog_only_core
+1/5 Test  #9: test_catalog_only_core ...........   Passed    0.25 sec
+    Start 11: test_sdk_executor_core
+2/5 Test #11: test_sdk_executor_core ...........   Passed    0.25 sec
+    Start 19: test_sdk_executor_driver
+3/5 Test #19: test_sdk_executor_driver .........   Passed    0.21 sec
+    Start 21: test_startup_pose_catalog
+4/5 Test #21: test_startup_pose_catalog ........***Failed    3.09 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_catalog --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (1 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+[       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (436 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (1360 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp:128: Failure
+Value of: irc_step_motion_executor::load_startup_pose_with_policy( TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "김오들(앞먼저닿음)", head, shoulder, actual, error)
+  Actual: false
+Expected: true
+startup pose not found: 김오들(앞먼저닿음)
+[  FAILED  ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (136 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (960 ms)
+[----------] 7 tests from StartupPoseCatalog (2894 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (2894 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+
+    Start 41: ball_fine_queue_contract
+5/5 Test #41: ball_fine_queue_contract .........   Passed  181.08 sec
+
+80% tests passed, 1 tests failed out of 5
+
+Label Time Summary:
+gtest    =   3.79 sec*proc (4 tests)
+
+Total Test time (real) = 184.88 sec
+
+The following tests FAILED:
+	 21 - test_startup_pose_catalog (Failed)
+Errors while running CTest

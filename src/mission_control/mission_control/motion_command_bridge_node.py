@@ -1970,8 +1970,11 @@ class MotionCommandBridgeNode(Node):
                 if isinstance(source_command, dict) else None
             )
             direction = "LEFT" if action == "ALIGN_LEFT" else "RIGHT"
-            near = isinstance(source_command, dict) and source_command.get("hurdle_near_control") is True
-            # Near entry owns the lowered camera; far turns keep camera-45 support.
+            near = isinstance(source_command, dict) and (
+                source_command.get("hurdle_near_control") is True
+                or source_command.get("hurdle_camera_down_control") is True
+            )
+            # Near entry and loss recovery both need camera-down turn support.
             motion_id = (
                 (f"pickup_camera_down_turn_{direction.lower()}_{count}" if near else
                  self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}"))
@@ -2093,6 +2096,15 @@ class MotionCommandBridgeNode(Node):
                  or (self.active_motion_id in MotionCommandBridgeNode.CRAB_MOTION_IDS
                      and motion_id in self.FINE_FORWARD_MOTION_IDS))
         )
+        # Source106 final forward has a different camera, speed, and gait.
+        # Keep mixed reservations here until completion; identical repeats use SDK queuing.
+        final_forward_ids = {"line_forward_6", "post_ball_forward_6"}
+        final_forward_transition = bool(
+            self.motion_in_progress
+            and ((self.active_motion_id in final_forward_ids) != (motion_id in final_forward_ids))
+        )
+        if final_forward_transition:
+            defer_until_active_finishes = True
         # Ordinary walking remains continuous; corrections must stop even when
         # their next command was reserved before physical completion.
         if self.motion_in_progress and (

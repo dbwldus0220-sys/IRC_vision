@@ -1,0 +1,380 @@
+[
+  {
+    "id": 0,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 02시 08분 15초.webm",
+    "start": 1794330495.0,
+    "duration": 272.116,
+    "events": [
+      {
+        "epoch": 1794330537.7470322,
+        "time": "2026-11-11T02:08:57.747032+09:00",
+        "message": "[INFO] [1794330537.747032265] [sdk_motion_executor]: Hurdle bottom dy 107.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_5681_1794330474939.log",
+        "line": 12,
+        "relative": 42.747
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 02시 18분 32초.webm",
+    "start": 1794331112.0,
+    "duration": 131.392,
+    "events": []
+  },
+  {
+    "id": 2,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 03시 04분 07초.webm",
+    "start": 1794333847.0,
+    "duration": 236.923,
+    "events": []
+  },
+  {
+    "id": 3,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 05시 13분 53초.webm",
+    "start": 1794341633.0,
+    "duration": 196.812,
+    "events": [
+      {
+        "epoch": 1794341791.7364411,
+        "time": "2026-11-11T05:16:31.736441+09:00",
+        "message": "[INFO] [1794341791.736441076] [sdk_motion_executor]: Hurdle bottom dy 111.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_3748_1794341689733.log",
+        "line": 15,
+        "relative": 158.736
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 06시 04분 51초.webm",
+    "start": 1794344691.0,
+    "duration": 227.217,
+    "events": [
+      {
+        "epoch": 1794344856.8739393,
+        "time": "2026-11-11T06:07:36.873939+09:00",
+        "message": "[INFO] [1794344856.873939201] [sdk_motion_executor]: Hurdle bottom dy 106.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_7939_1794344668292.log",
+        "line": 15,
+        "relative": 165.874
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 07시 29분 14초.webm",
+    "start": 1794349754.0,
+    "duration": 332.834,
+    "events": [
+      {
+        "epoch": 1794349876.3998518,
+        "time": "2026-11-11T07:31:16.399852+09:00",
+        "message": "[INFO] [1794349876.399851862] [sdk_motion_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_5127_1794349740541.log",
+        "line": 15,
+        "relative": 122.4
+      },
+      {
+        "epoch": 1794349999.819422,
+        "time": "2026-11-11T07:33:19.819422+09:00",
+        "message": "[INFO] [1794349999.819421957] [sdk_motion_executor]: Hurdle bottom dy 66.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_5127_1794349740541.log",
+        "line": 20,
+        "relative": 245.819
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 08시 53분 15초.webm",
+    "start": 1794354795.0,
+    "duration": 213.258,
+    "events": [
+      {
+        "epoch": 1794354917.9635696,
+        "time": "2026-11-11T08:55:17.963570+09:00",
+        "message": "[INFO] [1794354917.963569562] [sdk_motion_executor]: Hurdle bottom dy 41.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_4114_1794354784695.log",
+        "line": 15,
+        "relative": 122.964
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 10시 57분 28초.webm",
+    "start": 1794362248.0,
+    "duration": 146.301,
+    "events": [
+      {
+        "epoch": 1794362350.987544,
+        "time": "2026-11-11T10:59:10.987544+09:00",
+        "message": "[INFO] [1794362350.987544177] [sdk_motion_executor]: Hurdle bottom dy 85.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_4451_1794362199201.log",
+        "line": 15,
+        "relative": 102.988
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 11시 21분 29초.webm",
+    "start": 1794363689.0,
+    "duration": 74.553,
+    "events": []
+  },
+  {
+    "id": 9,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 12시 13분 19초.webm",
+    "start": 1794366799.0,
+    "duration": 320.43,
+    "events": []
+  },
+  {
+    "id": 10,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 14시 19분 29초.webm",
+    "start": 1794374369.0,
+    "duration": 214.535,
+    "events": [
+      {
+        "epoch": 1794374399.4228675,
+        "time": "2026-11-11T14:19:59.422868+09:00",
+        "message": "[INFO] [1794374399.422867466] [sdk_motion_executor]: Hurdle bottom dy 92.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_3729_1794374352453.log",
+        "line": 12,
+        "relative": 30.423
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 14시 32분 12초.webm",
+    "start": 1794375132.0,
+    "duration": 366.137,
+    "events": []
+  },
+  {
+    "id": 12,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 14시 51분 59초.webm",
+    "start": 1794376319.0,
+    "duration": 99.878,
+    "events": []
+  },
+  {
+    "id": 13,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 15시 00분 46초.webm",
+    "start": 1794376846.0,
+    "duration": 44.512,
+    "events": []
+  },
+  {
+    "id": 14,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 15시 33분 42초.webm",
+    "start": 1794378822.0,
+    "duration": 337.546,
+    "events": [
+      {
+        "epoch": 1794378866.162681,
+        "time": "2026-11-11T15:34:26.162681+09:00",
+        "message": "[INFO] [1794378866.162681123] [sdk_motion_executor]: Hurdle bottom dy 118.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_7859_1794378717650.log",
+        "line": 12,
+        "relative": 44.163
+      },
+      {
+        "epoch": 1794379002.4726558,
+        "time": "2026-11-11T15:36:42.472656+09:00",
+        "message": "[INFO] [1794379002.472655706] [sdk_motion_executor]: Hurdle bottom dy 118.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_7859_1794378717650.log",
+        "line": 17,
+        "relative": 180.473
+      },
+      {
+        "epoch": 1794379109.407714,
+        "time": "2026-11-11T15:38:29.407714+09:00",
+        "message": "[INFO] [1794379109.407713795] [sdk_motion_executor]: Hurdle bottom dy 105.0 px: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_7859_1794378717650.log",
+        "line": 22,
+        "relative": 287.408
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 18시 37분 36초.webm",
+    "start": 1794389856.0,
+    "duration": 253.825,
+    "events": [
+      {
+        "epoch": 1794389880.3933113,
+        "time": "2026-11-11T18:38:00.393311+09:00",
+        "message": "[INFO] [1794389880.393311298] [sdk_motion_executor]: Hurdle depth 0.553 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_4040_1794389842867.log",
+        "line": 12,
+        "relative": 24.393
+      },
+      {
+        "epoch": 1794390043.7253497,
+        "time": "2026-11-11T18:40:43.725350+09:00",
+        "message": "[INFO] [1794390043.725349647] [sdk_motion_executor]: Hurdle depth 0.579 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_4040_1794389842867.log",
+        "line": 20,
+        "relative": 187.725
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 22시 15분 01초.webm",
+    "start": 1794402901.0,
+    "duration": 64.657,
+    "events": []
+  },
+  {
+    "id": 17,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 22시 40분 53초.webm",
+    "start": 1794404453.0,
+    "duration": 63.337,
+    "events": []
+  },
+  {
+    "id": 18,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 22시 44분 53초.webm",
+    "start": 1794404693.0,
+    "duration": 37.526,
+    "events": []
+  },
+  {
+    "id": 19,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 22시 53분 42초.webm",
+    "start": 1794405222.0,
+    "duration": 58.941,
+    "events": []
+  },
+  {
+    "id": 20,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 22시 59분 23초.webm",
+    "start": 1794405563.0,
+    "duration": 220.674,
+    "events": []
+  },
+  {
+    "id": 21,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 23시 18분 54초.webm",
+    "start": 1794406734.0,
+    "duration": 349.42,
+    "events": [
+      {
+        "epoch": 1794406797.126797,
+        "time": "2026-11-11T23:19:57.126797+09:00",
+        "message": "[INFO] [1794406797.126797062] [sdk_motion_executor]: Hurdle depth 0.575 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_8937_1794406722131.log",
+        "line": 12,
+        "relative": 63.127
+      },
+      {
+        "epoch": 1794406960.826388,
+        "time": "2026-11-11T23:22:40.826388+09:00",
+        "message": "[INFO] [1794406960.826387765] [sdk_motion_executor]: Hurdle depth 0.574 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_8937_1794406722131.log",
+        "line": 20,
+        "relative": 226.826
+      },
+      {
+        "epoch": 1794406995.3368204,
+        "time": "2026-11-11T23:23:15.336820+09:00",
+        "message": "[INFO] [1794406995.336820379] [sdk_motion_executor]: Hurdle depth 0.572 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_8937_1794406722131.log",
+        "line": 22,
+        "relative": 261.337
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 12일 00시 08분 31초.webm",
+    "start": 1794409711.0,
+    "duration": 217.22,
+    "events": [
+      {
+        "epoch": 1794409738.844405,
+        "time": "2026-11-12T00:08:58.844405+09:00",
+        "message": "[INFO] [1794409738.844404960] [sdk_motion_executor]: Hurdle depth 0.563 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_16313_1794409700840.log",
+        "line": 12,
+        "relative": 27.844
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 12일 01시 06분 07초.webm",
+    "start": 1794413167.0,
+    "duration": 317.716,
+    "events": [
+      {
+        "epoch": 1794413210.197578,
+        "time": "2026-11-12T01:06:50.197578+09:00",
+        "message": "[INFO] [1794413210.197577960] [sdk_motion_executor]: Hurdle depth 0.540 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_9584_1794413157188.log",
+        "line": 12,
+        "relative": 43.198
+      },
+      {
+        "epoch": 1794413424.5071363,
+        "time": "2026-11-12T01:10:24.507136+09:00",
+        "message": "[INFO] [1794413424.507136304] [sdk_motion_executor]: Hurdle depth 0.565 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_9584_1794413157188.log",
+        "line": 20,
+        "relative": 257.507
+      },
+      {
+        "epoch": 1794413458.6794775,
+        "time": "2026-11-12T01:10:58.679477+09:00",
+        "message": "[INFO] [1794413458.679477370] [sdk_motion_executor]: Hurdle depth 0.570 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_9584_1794413157188.log",
+        "line": 22,
+        "relative": 291.679
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 12일 02시 30분 08초.webm",
+    "start": 1794418208.0,
+    "duration": 278.434,
+    "events": [
+      {
+        "epoch": 1794418243.115695,
+        "time": "2026-11-12T02:30:43.115695+09:00",
+        "message": "[INFO] [1794418243.115695006] [sdk_motion_executor]: Hurdle depth 0.553 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_3407_1794418194911.log",
+        "line": 12,
+        "relative": 35.116
+      },
+      {
+        "epoch": 1794418407.940054,
+        "time": "2026-11-12T02:33:27.940054+09:00",
+        "message": "[INFO] [1794418407.940053923] [sdk_motion_executor]: Hurdle depth 0.564 m: camera 0-degree hold latched (motor 0 -64.0 deg)",
+        "log": "/home/jet/.ros/log/sdk_motion_executor_3407_1794418194911.log",
+        "line": 20,
+        "relative": 199.94
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 12일 05시 12분 21초.webm",
+    "start": 1794427941.0,
+    "duration": 164.613,
+    "events": []
+  },
+  {
+    "id": 26,
+    "path": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 12일 05시 36분 08초.webm",
+    "start": 1794429368.0,
+    "duration": 146.733,
+    "events": []
+  }
+]

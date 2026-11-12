@@ -1,0 +1,8 @@
+{
+  "baseline_failed": 185,
+  "updated_failed": 184,
+  "new_failures": [],
+  "resolved_failures": [
+    "test.test_motion_decision_node::test_mission_progress_contains_exact_fields_and_values"
+  ]
+}

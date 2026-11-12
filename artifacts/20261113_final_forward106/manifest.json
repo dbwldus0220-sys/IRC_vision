@@ -1,0 +1,12 @@
+{
+  "source_sha256": "a7ce8f085cbed719aa32375feeb00d19497c56fecdd36d80f8296312ba4f5e5f",
+  "replaced": "m전진45(6회)",
+  "replacement": "최종전진",
+  "aliases": [
+    "line_forward_6",
+    "post_ball_forward_6"
+  ],
+  "cycle_ms": 644,
+  "duration_seconds": 3.864,
+  "playback_speed": 1.0
+}

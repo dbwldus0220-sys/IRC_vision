@@ -1,5 +1,45 @@
 # Runtime Motion Policy
 
+- The source106 request replaces ONLY `m전진45(6회)` with `최종전진`.
+  Preserve all four supplied frames, camera motor 0 at -64 degrees, six repeats,
+  and original speed 1.0; runtime tolerance remains 5 degrees. Map both
+  `line_forward_6` and `post_ball_forward_6` to the new name. Other forward
+  variants, including eight cycles, retain their previous data and speed.
+  Use 644 ms per cycle / 3.864 seconds per batch for capture/reservations.
+  Same-motion repeats queue in the SDK; mixed transitions are reserved in
+  the bridge until successful completion because camera/speed differ.
+  Snapshot: `20261113_final_forward106/source_robot_motions.json`.
+
+- The latest source103 stationary-right-turn request verifies all 24 camera/count
+  variants, both pickup/goal right turns, two shortened goal turns, and two right
+  goal exits against `20261112_stationary_right103/source_robot_motions.json`.
+  Preserve source speed 0.9 for standalone turns and 1.0 for composites.
+  Derive missing one/four-cycle turns from the same-camera two-cycle source.
+  Keep `오뒤무게중심앞(catalog70)` pose identities to avoid startup pose collisions.
+  All 30 deployed motions already match this source policy; reimport is a no-op.
+  Keep existing command aliases, reservation gates, and completion handling.
+
+- The latest source105 request replaces ONLY `n공에서 전진하고 후진준비자세`
+  with its complete six-frame source data at original speed 1.0 and repeat_count=1.
+  This supersedes the embedded-forward retiming policy below for this motion.
+  Preserve the supplied 300 ms preparation gap and final backward-ready pose.
+  Its frame-end duration is 939 ms; max_seq_ms=1212 is editor metadata.
+  Keep its public alias, completion-driven sequencing, and existing post-hold.
+  Keep all other motions unchanged, including ordinary m gait speed 1.05.
+  Snapshot and updater: `20261112_pickup_prepare105/`.
+
+- The latest 2026-11-12 request sets ONLY ordinary forward (`m전진*`, 12)
+  and line recovery (`m라인복귀*`, 6) to absolute playback_speed=1.05.
+  This explicit speed edit applies to both deployed PC and runtime catalogs;
+  archived source files retain their original speeds. Keep fine forward,
+  standalone turns, backward, pickup, shots, hurdle, and all alias targets unchanged.
+  Preserve all gait frames, camera targets, torque flags, and repeat counts.
+  Rebuild the four goal-exit gait tails at 1.05, preserving turns and the real
+  500 ms hold. In `n공에서 전진하고 후진준비자세`, speed up only its four
+  forward frames; preserve the preparation tail duration, gap, and targets.
+  Refresh every ordinary-walk capture/reservation estimate to 514 ms / 1.05
+  per cycle. Snapshot and updater: `20261112_forward_recovery_speed105/`.
+
 - The latest 2026-11-12 request reverts the source104 right-turn replacement.
   Restore `t공후 제자리우회전`, `t골대후제자리우회전`, their five/six-cycle
   variants, and both right goal exits exactly from

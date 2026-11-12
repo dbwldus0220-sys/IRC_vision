@@ -1,0 +1,212 @@
+................................................................F....... [ 28%]
+..............FFFF..FFFFFFFFFFFF.....FFFFFFFFFFFF....................... [ 56%]
+........................................................................ [ 84%]
+........................................                                 [100%]
+=================================== FAILURES ===================================
+_ test_node_right_turn_post_rest_is_point_three_without_restarting_on_duplicate[ALIGN_RIGHT-hurdle-HURDLE_POSITIONING-hurdle_post_motion_dwell_until] _
+src/mission_control/test/test_right_turn_timing.py:38: in test_node_right_turn_post_rest_is_point_three_without_restarting_on_duplicate
+    assert getattr(node, field) == pytest.approx(12.3)
+E   AssertionError: assert 13.0 == 12.3 ± 1.2e-05
+E    +  where 13.0 = getattr(<test_mission_phase_flow.MissionFlowHarness object at 0xffff9f4aacb0>, 'hurdle_post_motion_dwell_until')
+E    +  and   12.3 ± 1.2e-05 = <function approx at 0xffffb0cc2ef0>(12.3)
+E    +    where <function approx at 0xffffb0cc2ef0> = pytest.approx
+_ test_goal_scoring_band_alignment_shares_all_boundaries[0.5-LEFT--1-boundaries0] _
+src/mission_control/test/test_right_turn_bins.py:51: in test_goal_scoring_band_alignment_shares_all_boundaries
+    assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E   AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     + WAIT
+_ test_goal_scoring_band_alignment_shares_all_boundaries[0.5-RIGHT-1-boundaries1] _
+src/mission_control/test/test_right_turn_bins.py:51: in test_goal_scoring_band_alignment_shares_all_boundaries
+    assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E   AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_1'
+E     - GOAL_CAMERA90_TURN_RIGHT_1
+E     + WAIT
+_ test_goal_scoring_band_alignment_shares_all_boundaries[0.58-LEFT--1-boundaries0] _
+src/mission_control/test/test_right_turn_bins.py:51: in test_goal_scoring_band_alignment_shares_all_boundaries
+    assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E   AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     + WAIT
+_ test_goal_scoring_band_alignment_shares_all_boundaries[0.58-RIGHT-1-boundaries1] _
+src/mission_control/test/test_right_turn_bins.py:51: in test_goal_scoring_band_alignment_shares_all_boundaries
+    assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E   AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_1'
+E     - GOAL_CAMERA90_TURN_RIGHT_1
+E     + WAIT
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[8.0-1] ___
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[29.999-1] _
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[30.0-2] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_2'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[44.999-2] _
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_2'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[45.0-3] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_3'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[59.999-3] _
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_3'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[60.0-4] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_4'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_4
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[74.999-4] _
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_4'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_4
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[75.0-5] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_5'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_5
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[89.999-5] _
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_5'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_5
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+__ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[90.0-6] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_6'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_6
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_ test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[180.0-6] __
+src/mission_control/test/test_right_turn_bins.py:75: in test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot
+    assert decision.action == f'{prefix}_TURN_LEFT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_6'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_6
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1] ____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_3'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3] ____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_3'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_5'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5] ____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_5'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[60.0-6] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_6'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_6
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6] ____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_6'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_6
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[75.0-7] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_7'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_7
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[89.999-7] ____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_7'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_7
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_9'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_9
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9] _____
+src/mission_control/test/test_right_turn_bins.py:137: in test_right_boundaries_reach_ball_pickup_goal_and_line_routes
+    assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_9'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_9
+E     + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+- generated xml file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261112_stationary_right103/tests.xml -
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_right_turn_timing.py::test_node_right_turn_post_rest_is_point_three_without_restarting_on_duplicate[ALIGN_RIGHT-hurdle-HURDLE_POSITIONING-hurdle_post_motion_dwell_until]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_scoring_band_alignment_shares_all_boundaries[0.5-LEFT--1-boundaries0]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_scoring_band_alignment_shares_all_boundaries[0.5-RIGHT-1-boundaries1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_scoring_band_alignment_shares_all_boundaries[0.58-LEFT--1-boundaries0]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_scoring_band_alignment_shares_all_boundaries[0.58-RIGHT-1-boundaries1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[8.0-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[29.999-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[30.0-2]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[44.999-2]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[45.0-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[59.999-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[60.0-4]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[74.999-4]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[75.0-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[89.999-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[90.0-6]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[180.0-6]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[60.0-6]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[75.0-7]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[89.999-7]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9]
+29 failed, 227 passed in 13.00s

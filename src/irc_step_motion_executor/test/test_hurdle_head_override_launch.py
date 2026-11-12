@@ -258,3 +258,17 @@ class TestHurdleHeadOverride(unittest.TestCase):
         self.navigation("goal")
         self.hold(False)
         self.assertTrue(self.heartbeats[-1]["goal_head_override_active"])
+
+        # The finish marker must not lower the head, even before mode entry.
+        self.publish(TOPICS[4], {
+            "source": "line", "valid": True, "phase": "LINE_TRACK",
+            "mission_progress": {"required_hurdles": 3, "hurdles_completed": 2},
+        })
+        self.observation(depth_m=.58)
+        self.hold(False)
+        self.navigation("line", phase="HURDLE_FINISH_RUN")
+        self.observation(depth_m=.3)
+        self.hold(False)
+        self.navigation("hurdle", phase="HURDLE_POSITIONING")
+        self.observation(depth_m=.1)
+        self.hold(False)

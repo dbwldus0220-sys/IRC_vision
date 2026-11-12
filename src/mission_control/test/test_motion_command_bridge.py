@@ -304,8 +304,8 @@ def test_straight_queue_ack_is_forwarded_without_releasing_active_motion():
 
 
 @pytest.mark.parametrize("first,second,expected", [
-    ("STRAIGHT_2", "STRAIGHT_3", ["line_forward_4", "line_forward_6"]),
-    ("STRAIGHT_3", "STRAIGHT_1", ["line_forward_6", "line_forward_2"]),
+    ("STRAIGHT_2", "STRAIGHT_4", ["line_forward_4", "line_forward_8"]),
+    ("STRAIGHT_4", "STRAIGHT_1", ["line_forward_8", "line_forward_2"]),
     ("GOAL_CAMERA_90_FORWARD_1", "GOAL_CAMERA_90_FORWARD_2",
      ["goal_camera_90_forward_2", "goal_camera_90_forward_4"]),
 ])

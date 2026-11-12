@@ -1,6 +1,10 @@
 """Normal walking may skip fine walking only at a fresh centered 210px checkpoint."""
 
+import json
+from pathlib import Path
+
 import pytest
+import yaml
 
 from mission_control.motion_decision_planner import MotionDecisionPlanner
 from test_continuous_approach import clock, fresh
@@ -18,6 +22,14 @@ WALKS = ['line_forward_2', 'line_forward_4', 'line_forward_6', 'line_forward_8',
          'line_recovery_ball_first_left_4', 'line_recovery_ball_second_right_4']
 CRABS = ['pickup_crab_left_0', 'pickup_crab_right_0',
          'pickup_crab_left_0_2', 'pickup_crab_right_0_2']
+
+
+def preparation_duration(motion_id):
+    root = Path(__file__).resolve().parents[3]
+    aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+    motions = json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']
+    motion = next(m for m in motions if m['name'] == aliases[motion_id])
+    return max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000
 
 
 @pytest.mark.parametrize('previous', WALKS)
@@ -77,7 +89,10 @@ def prepare_skip(clock, previous, index):
 @pytest.mark.parametrize('index', [1, 2])
 def test_skip_preparation_one_second_then_retreat_and_grasp(clock, previous, index):
     node, bridge, request = prepare_skip(clock, previous, index)
-    clock[0] += .754
+    clock[0] += preparation_duration(request['motion_id'])
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == 1
+    # Elapsed nominal duration alone must not release the next motion.
     bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
     deadline = clock[0] + .5
     assert bridge.transition_dwell_until == pytest.approx(deadline)
@@ -194,7 +209,9 @@ def test_normal_walk_reaches_skip_checkpoint_after_accepted_queue(clock, index, 
     assert ids[-1] == 'pickup_forward_to_backward_prepare'
     assert 'ball_general_fine_forward_8' not in ids and 'pickup_fine_forward_0' not in ids
     preparation = decoded_messages(bridge.executor_request_publisher)[-1]
-    clock[0] += .754
+    clock[0] += preparation_duration(preparation['motion_id'])
+    bridge._check_atomic_dwell()
+    assert decoded_messages(bridge.executor_request_publisher)[-1] == preparation
     completed_at = clock[0]
     forward_status(node, bridge, preparation, 'SUCCEEDED')
     clock[0] = completed_at + .5

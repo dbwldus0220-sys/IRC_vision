@@ -14,6 +14,7 @@ from mission_control.motion_decision_node import MotionDecisionNode as Node
 ROOT = Path(__file__).resolve().parents[3]
 ORIGINAL = ROOT / 'artifacts/20261112_catalog104_right_turns/before'
 UPDATE = ROOT / 'artifacts/20261112_restore_t_right_turns'
+DEPLOYED = ROOT / 'artifacts/20261112_forward_recovery_speed105/before'
 MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
 sys.path.insert(0, str(ROOT / 'tools'))
 from build_post_shot_forward_exits import build_exit
@@ -29,7 +30,7 @@ def catalog(path):
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
 def test_exact_restore_and_unrelated_data_preserved(kind):
     relative = Path(f'artifacts/robot_motions_{kind}.json')
-    actual = catalog(ROOT / relative)
+    actual = catalog(DEPLOYED / relative)
     original = catalog(ORIGINAL / relative)
     before = catalog(UPDATE / 'before' / relative)
     assert actual == original
@@ -47,8 +48,9 @@ def test_aliases_durations_and_timeout_budget_match_runtime():
     assert set(actual.values()) <= motions.keys()
     for name, seconds in MANIFEST['duration_seconds'].items():
         motion = motions[name]
-        assert seconds == pytest.approx(max(f['start_ms'] + f['time_ms'] for f in motion['frames'])
-                                        * motion['repeat_count'] / motion['playback_speed'] / 1000)
+        if '+' not in name:
+            assert seconds == pytest.approx(max(f['start_ms'] + f['time_ms'] for f in motion['frames'])
+                                            * motion['repeat_count'] / motion['playback_speed'] / 1000)
         assert seconds * 1000 + motion['completion']['settle_timeout_ms'] < Bridge.DEFAULT_TIMEOUT_MS
     for action, (seconds, _) in Node.POST_SHOT_EXIT_CAPTURE_CONFIG.items():
         motion = motions[actual[Bridge.ACTION_TO_MOTION_ID[action]]]

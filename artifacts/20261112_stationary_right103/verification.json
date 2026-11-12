@@ -1,0 +1,190 @@
+{
+  "motion_count": 30,
+  "related_alias_count": 49,
+  "catalogs_changed": false,
+  "idempotent_reimport": true,
+  "catalog_validation": {
+    "pc": "168 motions, aliases and motor IDs valid",
+    "runtime": "168 motions, aliases and motor IDs valid"
+  },
+  "new_source_contract_tests": {
+    "passed": 51,
+    "failed": 0
+  },
+  "python_tests": {
+    "passed": 227,
+    "failed": 29,
+    "preexisting_failures": [
+      {
+        "suite": "src.mission_control.test.test_right_turn_timing",
+        "name": "test_node_right_turn_post_rest_is_point_three_without_restarting_on_duplicate[ALIGN_RIGHT-hurdle-HURDLE_POSITIONING-hurdle_post_motion_dwell_until]",
+        "message": "AssertionError: assert 13.0 == 12.3 ± 1.2e-05\n +  where 13.0 = getattr(<test_mission_phase_flow.MissionFlowHarness object at 0xffff9f4aacb0>, 'hurdle_post_motion_dwell_until')\n +  and   12.3 ± 1.2e-05 = <function approx at 0xffffb0cc2ef0>(12.3)\n +    where <function approx at 0xffffb0cc2ef0> = pytest.approx"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_goal_scoring_band_alignment_shares_all_boundaries[0.5-LEFT--1-boundaries0]",
+        "message": "AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_LEFT_1'\n  - GOAL_CAMERA90_TURN_LEFT_1\n  + WAIT"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_goal_scoring_band_alignment_shares_all_boundaries[0.5-RIGHT-1-boundaries1]",
+        "message": "AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_1'\n  - GOAL_CAMERA90_TURN_RIGHT_1\n  + WAIT"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_goal_scoring_band_alignment_shares_all_boundaries[0.58-LEFT--1-boundaries0]",
+        "message": "AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_LEFT_1'\n  - GOAL_CAMERA90_TURN_LEFT_1\n  + WAIT"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_goal_scoring_band_alignment_shares_all_boundaries[0.58-RIGHT-1-boundaries1]",
+        "message": "AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_1'\n  - GOAL_CAMERA90_TURN_RIGHT_1\n  + WAIT"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[8.0-1]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_1'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[29.999-1]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_1'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[30.0-2]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_2'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[44.999-2]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_2'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[45.0-3]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_3'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[59.999-3]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_3'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[60.0-4]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_4'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_4\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[74.999-4]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_4'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_4\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[75.0-5]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_5'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_5\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[89.999-5]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_5'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_5\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[90.0-6]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_6'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_6\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot[180.0-6]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...N_TURN_LEFT_6'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_6\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_1'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_1'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_3'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_3'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_5'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_5'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[60.0-6]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_6'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_6\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_6'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_6\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[75.0-7]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_7'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_7\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[89.999-7]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_7'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_7\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_9'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_9\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      },
+      {
+        "suite": "src.mission_control.test.test_right_turn_bins",
+        "name": "test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9]",
+        "message": "AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_..._TURN_RIGHT_9'\n  - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_9\n  + BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+      }
+    ]
+  },
+  "failure_scope": "Python failures were already observed before adding source103 tests; motion data and controller logic are unchanged. Startup C++ failure references removed catalog49 pose 김오들(앞먼저닿음).",
+  "hardware_run": false,
+  "catalog_sha256": {
+    "artifacts/robot_motions_pc.json": "bead9dc72bcc9a35c921e86f1bfad1f3d4b7afb01f3533fa1709f80691ea039d",
+    "artifacts/robot_motions_runtime.json": "e345c2453e400dc15a8821adac2326cc78961ea78cf987cbd9847d30b7bf7c40"
+  },
+  "cpp_suites": {
+    "passed": 4,
+    "failed": 1,
+    "queue_contract": "passed",
+    "new_right_turn_queue_pairs": 256,
+    "queue_checks": [
+      "queue accepted",
+      "duplicate queue rejected",
+      "completion sequence advances twice",
+      "final queued motion completes",
+      "boundary commanded positions remain continuous"
+    ],
+    "preexisting_startup_failure": "StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination: missing 김오들(앞먼저닿음)",
+    "log": "cpp_tests.log"
+  },
+  "limitations": [
+    "No physical robot execution or balance validation",
+    "Existing planner and historical startup tests remain failing; this is not a full green repository test run"
+  ]
+}

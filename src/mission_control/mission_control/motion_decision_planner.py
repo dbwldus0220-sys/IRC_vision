@@ -349,7 +349,9 @@ class MotionDecisionPlanner:
         self.previous_source = source
         info = observations.get(source)
         hurdle_positioning = source == "hurdle" and (
-            self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
+            self.hurdle_planner.fine_approach_active
+            or self._hurdle_positioning_ready(info)
+            or normalized_phase == "HURDLE_POSITIONING"
         )
         if source == "hurdle" and info is not None:
             # Hurdle yaw controls walking; Line side is used only for first-entry loss.
@@ -358,6 +360,15 @@ class MotionDecisionPlanner:
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
         if source == "hurdle":
+            missing_during_approach = (
+                self.hurdle_lock_active
+                and not self.hurdle_planner.fine_approach_active
+                and info is not None
+                and info.get("hurdle_camera_ready") is True
+                and info.get("hurdle_camera_pose") in {"45", "0"}
+                and info.get("detected") is False
+                and info.get("raw_detected") is False
+            )
             # The node admits fresh post-motion observations before dispatch.
             missing_after_near_entry = (
                 normalized_phase == "HURDLE_POSITIONING"
@@ -368,13 +379,16 @@ class MotionDecisionPlanner:
                 and info.get("detected") is False
                 and info.get("raw_detected") is False
             )
-            if missing_after_near_entry:
+            if missing_during_approach or missing_after_near_entry:
+                reason = ("hurdle_approach_missing_backward_2" if missing_during_approach
+                          else "hurdle_near_missing_backward_2")
                 command = {
-                    **self.hurdle_planner.wait("hurdle_near_missing_backward_2").to_dict(),
+                    **self.hurdle_planner.wait(reason).to_dict(),
                     "action": "HURDLE_LOST_BACKWARD_2",
                     "valid": True,
                     "recovery_active": True,
-                    "hurdle_near_control": True,
+                    "hurdle_near_control": self.hurdle_planner.fine_approach_active,
+                    "hurdle_camera_down_control": True,
                 }
             elif command.get("action") == "HURDLE_LOST_BACKWARD_2":
                 # The old first-bottom-loss path must obey the same entry gates.
@@ -387,6 +401,9 @@ class MotionDecisionPlanner:
                 command["alignment_reference"] = "last_seen_screen_side"
             command["hurdle_camera_pose"] = info.get("hurdle_camera_pose")
             command["hurdle_camera_ready"] = info.get("hurdle_camera_ready") is True
+            # Recovery can lower the camera before the 580 mm near-entry gate.
+            if info.get("hurdle_camera_pose") == "0":
+                command["hurdle_camera_down_control"] = True
         if source == "hurdle":
             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
         if hurdle_positioning:
@@ -510,7 +527,8 @@ class MotionDecisionPlanner:
             if not self._confirmed_hurdle(hurdle_info):
                 self.hurdle_ignore_until_clear = False
             return
-        if self._hurdle_positioning_ready(hurdle_info):
+        # Ownership begins at approach entry; 580 mm only starts near control.
+        if self._hurdle_approach_ready(hurdle_info):
             self.hurdle_lock_active = True
 
     def _update_object_locks(

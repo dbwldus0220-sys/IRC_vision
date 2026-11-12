@@ -23,7 +23,7 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.approach_depth_m = 0.5
     analyzer.score_target_depth_m = 0.51
     analyzer.direction_deadband_norm = 0.04
-    analyzer.backboard_line_width_m = 0.155
+    analyzer.backboard_line_width_m = 0.17
     analyzer.backboard_sample_y_ratio = 0.18
     analyzer.backboard_edge_inset_ratio = 0.10
     analyzer.backboard_parallel_tolerance_deg = 3.0

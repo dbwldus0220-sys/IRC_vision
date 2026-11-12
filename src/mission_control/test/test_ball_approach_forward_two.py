@@ -16,7 +16,7 @@ def start(node, bridge, clock):
     request = send(bridge, command)
     assert request['motion_id'] == 'ball_align_forward_2'
     status(node, bridge, request, 'RUNNING')
-    assert node.ball_fine_duration_sec == pytest.approx(1.028)
+    assert node.ball_fine_duration_sec == pytest.approx(1.028 / 1.05)
     return request, node.ball_fine_started_at
 
 
@@ -28,7 +28,7 @@ def test_ten_hz_captures_queue_or_resume_after_completion(clock, index, latency)
     node.phase_manager.ball_modes_confirmed = index
     request, started = start(node, bridge, clock)
     end = started + node.ball_fine_duration_sec
-    for capture_delta in (.65, .75, .85):
+    for capture_delta in (.60, .70, .80):
         received = started + capture_delta + latency
         if received >= end:
             break
@@ -108,7 +108,7 @@ def test_rejected_reservation_can_retry_after_successful_current_walk(clock):
     status(node, bridge, following, 'REJECTED')
     assert node.queued_general_command_id is None
     assert not getattr(node, 'ball_fine_faulted', False)
-    clock[0] = started + 1.028
+    clock[0] = started + node.ball_fine_duration_sec
     status(node, bridge, request, 'SUCCEEDED')
     for _ in range(3):
         fresh(node, clock, 'ball', ball())

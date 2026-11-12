@@ -1,0 +1,17 @@
+{
+  "baseline_tests": 720,
+  "baseline_failed": 70,
+  "updated_tests": 725,
+  "updated_passed": 655,
+  "updated_failed": 70,
+  "new_failures": [],
+  "resolved_failures": [],
+  "ordinary_gaits": 18,
+  "forward": 12,
+  "line_recovery": 6,
+  "aliases_changed": false,
+  "sdk_queue_contract": "passed",
+  "catalog_validation": "pc/runtime passed: 168 motions each",
+  "idempotent": true,
+  "hardware_executed": false
+}

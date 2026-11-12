@@ -3638,12 +3638,16 @@ class Yolo26Detector(Node):
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, running_banner[0], running_banner[1])
         fault_banner = self._executor_fault_banner(decision_debug)
+        finish_banner = self._finish_run_banner(decision_debug)
         camera_banner = self._camera_recovery_banner(decision_debug)
         lost_banner = self._ball_lost_banner(decision_debug)
         if fault_banner is not None:
             # Replace any earlier action banner, including vision-only pickup.
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, fault_banner, (0, 0, 180))
+        elif finish_banner is not None:
+            cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+            self._draw_action_banner(annotated, finish_banner, (0, 125, 190))
         elif camera_banner is not None:
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, camera_banner, (0, 100, 220))
@@ -3664,6 +3668,15 @@ class Yolo26Detector(Node):
                     self._draw_action_banner(annotated, line_stop, (0, 100, 220))
             self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _finish_run_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        run = (decision_debug or {}).get("finish_run") or {}
+        if run.get("latched") is not True:
+            return None
+        if run.get("fault"):
+            return f"FINISH STOPPED: {run['fault']}"
+        return "HURDLE 3 / FINISH FORWARD 6 REPEAT"
 
     @staticmethod
     def _camera_recovery_banner(decision_debug: dict[str, Any] | None) -> str | None:

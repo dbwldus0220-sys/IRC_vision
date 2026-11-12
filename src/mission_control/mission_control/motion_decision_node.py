@@ -52,6 +52,7 @@ from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .executor_heartbeat_watchdog import HeartbeatStartupDelay
 from .lost_search_turn_limiter import LostSearchTurnLimiter
 from .goal_initial_search import GoalInitialSearch
+from .finish_run import FinishRun
 from .hurdle_line_fusion import build_hurdle_path_reference
 from .mission_phase_manager import MissionPhaseManager
 from .motion_command_gate import GeneralMotionCommandGate
@@ -123,16 +124,16 @@ class MotionDecisionNode(Node):
     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
     LINE_MOTION_CAPTURE_CONFIG = {
         # Source103 m gaits: 514ms per cycle at source speed 1.0, including holds.
-        "STRAIGHT": (.514 * 6, 10),
-        "STRAIGHT_1": (.514 * 2, 5),
-        "STRAIGHT_2": (.514 * 4, 10),
-        "STRAIGHT_3": (.514 * 6, 10),
-        "STRAIGHT_4": (.514 * 8, 15),
-        "LEFT": (.514 * 4, 15),
-        "RIGHT": (.514 * 4, 15),
-        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (.514 * 4, 15)
+        "STRAIGHT": (.644 * 6, 10),  # Source106 최종전진 at original speed 1.0.
+        "STRAIGHT_1": (.514 * 2 / 1.05, 5),
+        "STRAIGHT_2": (.514 * 4 / 1.05, 10),
+        "STRAIGHT_3": (.644 * 6, 10),
+        "STRAIGHT_4": (.514 * 8 / 1.05, 15),
+        "LEFT": (.514 * 4 / 1.05, 15),
+        "RIGHT": (.514 * 4 / 1.05, 15),
+        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (.514 * 4 / 1.05, 15)
            for side in ("LEFT", "RIGHT") for suffix in (2, 4, 6, 8, 10, 13)},
-        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (.514 * 4, 15)
+        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (.514 * 4 / 1.05, 15)
            for side in ("LEFT", "RIGHT") for suffix in (4, 6, 8, 10, 12, 15)},
     }
     LINE_MOTION_CAPTURE_START_RATIO = 0.70
@@ -151,19 +152,19 @@ class MotionDecisionNode(Node):
         "LINE_LOST_TURN_RIGHT": (.300 * 5 / .9, 3),
     }
     BALL_RECOVERY_DURATION_SEC = {
-        "line_recovery_ball_first_left_4": .514 * 4,
-        "line_recovery_ball_second_right_4": .514 * 4,
+        "line_recovery_ball_first_left_4": .514 * 4 / 1.05,
+        "line_recovery_ball_second_right_4": .514 * 4 / 1.05,
     }
     # Reserve another recovery near the end, leaving transport/tick headroom.
     # The SDK accepts a compatible queue until the running motion completes.
     LINE_RECOVERY_PREQUEUE_LEAD_SEC = 0.30
     # Full stored cycle duration, including its leading hold.
     GOAL_FORWARD_DURATION_SEC = {
-        "GOAL_CAMERA_90_FORWARD": .514 * 6,
-        "GOAL_CAMERA_90_FORWARD_1": .514 * 2,
-        "GOAL_CAMERA_90_FORWARD_2": .514 * 4,
-        "GOAL_CAMERA90_RECOVER_LEFT_4": .514 * 4,
-        "GOAL_CAMERA90_RECOVER_RIGHT_4": .514 * 4,
+        "GOAL_CAMERA_90_FORWARD": .514 * 6 / 1.05,
+        "GOAL_CAMERA_90_FORWARD_1": .514 * 2 / 1.05,
+        "GOAL_CAMERA_90_FORWARD_2": .514 * 4 / 1.05,
+        "GOAL_CAMERA90_RECOVER_LEFT_4": .514 * 4 / 1.05,
+        "GOAL_CAMERA90_RECOVER_RIGHT_4": .514 * 4 / 1.05,
         **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .394 * count / 1.05
            for count in range(1, 6)},
     }
@@ -177,15 +178,15 @@ class MotionDecisionNode(Node):
     GOAL_FORWARD_CAPTURE_WINDOW_SEC = 0.6
     APPROACH_WALK_DURATION_SEC = {
         "BALL_APPROACH_FINE_FORWARD_5": .394 * 5 / 1.05,
-        "BALL_APPROACH_FORWARD_2": .514 * 2,
-        "STRAIGHT": .514 * 4,
-        "STRAIGHT_1": .514 * 2,
-        "STRAIGHT_3": .514 * 6,
-        "RECOVER_LEFT_TURN_LEFT_4": .514 * 4,
-        "RECOVER_RIGHT_TURN_RIGHT_4": .514 * 4,
+        "BALL_APPROACH_FORWARD_2": .514 * 2 / 1.05,
+        "STRAIGHT": .514 * 4 / 1.05,
+        "STRAIGHT_1": .514 * 2 / 1.05,
+        "STRAIGHT_3": .644 * 6,
+        "RECOVER_LEFT_TURN_LEFT_4": .514 * 4 / 1.05,
+        "RECOVER_RIGHT_TURN_RIGHT_4": .514 * 4 / 1.05,
     }
     APPROACH_WALK_CAPTURE_FRAMES = 3
-    # A two-cycle gait lasts 1.028 s; collect early enough for camera latency.
+    # A two-cycle gait lasts about 0.979 s; allow for camera latency.
     HURDLE_WALK_CAPTURE_START_RATIO = 0.0
     HURDLE_WALK_COMMIT_RATIO = 0.70
     BALL_ENTRY_MISSING_GRACE_SEC = 0.20
@@ -206,10 +207,10 @@ class MotionDecisionNode(Node):
     # Full catalog duration; the final 30 percent is within the recovery tail.
     POST_SHOT_EXIT_CAPTURE_CONFIG = {
         # Legacy IDs: right six / left four turns, forward two, then recovery four.
-        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (6.124, 3),
-        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (5.297142857142857, 3),
-        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": (5.429, 3),
-        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": (4.607619047619048, 3),
+        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (5.981, 3),
+        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (5.154285714285714, 3),
+        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": (5.335, 3),
+        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": (4.513333333333333, 3),
     }
     CORRECTION_POST_MOTION_DWELL_SEC = 0.5
     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
@@ -355,7 +356,7 @@ class MotionDecisionNode(Node):
         )
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
-        self.declare_parameter("required_hurdles", 2)
+        self.declare_parameter("required_hurdles", 3)
         self.declare_parameter("required_ball_sections", 2)
         self.declare_parameter("finish_min_confidence", 0.70)
         self.declare_parameter("general_motion_transient_retry_limit", 2)
@@ -1116,6 +1117,9 @@ class MotionDecisionNode(Node):
                 self.goal_stationary_since = None
                 self.motion_stationary_since = None
             if not auto_ready:
+                run = getattr(self, "finish_run", None)
+                if run is not None and run.latched:
+                    run.fault = "executor_not_ready"
                 self.pending_line_corner = None
                 self.line_corner_rearm_required = False
                 self.pending_hurdle_final_sequence = None
@@ -1467,6 +1471,7 @@ class MotionDecisionNode(Node):
                 if source == "hurdle":
                     if self.active_special_command_id is None:
                         self.planner.hurdle_planner.observe(payload)
+                    MotionDecisionNode._latch_hurdle_approach_entry(self, payload)
                     MotionDecisionNode._latch_hurdle_positioning_entry(self, payload)
                 if (
                     source == "ball"
@@ -2518,8 +2523,93 @@ class MotionDecisionNode(Node):
             # A verified current far Ball also releases the raw-candidate hold.
             MotionDecisionNode._update_ball_confirmation_pending(self, verified, received_at)
 
+    def _latch_hurdle_approach_entry(self, payload: dict[str, Any]) -> None:
+        """Keep confirmed approach ownership even while the current gait runs."""
+        if FinishRun.armed(self.phase_manager):
+            return
+        if (
+            self.planner.hurdle_lock_active
+            or self.planner.ball_lock_active
+            or self.planner.goal_lock_active
+            or self.active_special_command_id is not None
+            or self.mission_phase not in {"AUTO", "LINE_TRACK", "HURDLE_APPROACH", "HURDLE_SEARCH"}
+            or (self.general_motion_gate.locked
+                and self.active_general_source not in {"line", "hurdle"})
+            or self.phase_manager.hurdles_completed >= self.phase_manager.required_hurdles
+            or self.phase_manager.execution_limit_reached("GO")
+            or not self.planner._hurdle_approach_ready(payload)
+        ):
+            return
+        self.planner.hurdle_lock_active = True
+        self.get_logger().info(
+            f"HURDLE approach lock acquired: depth_m={payload.get('depth_m')}"
+        )
+
+    def _latch_finish_run(self, payload: dict[str, Any]) -> None:
+        """Treat the third confirmed near hurdle as the finish line."""
+        run = getattr(self, "finish_run", None)
+        if run is None:
+            run = self.finish_run = FinishRun()
+        if (run.latched or not self.decision_started or not self.executor_auto_ready
+                or self.executor_ready_requires_fresh_vision or self.safety_interlock.latched
+                or self.active_special_command_id is not None
+                or not MotionDecisionNode._capture_time_valid(self, "hurdle", payload)):
+            return
+        # Do not count the second obstacle again while it leaves the image.
+        if payload.get("detected") is False and payload.get("raw_detected") is not True:
+            run.clear_seen = True
+        if (not run.clear_seen or self.mission_phase not in {"AUTO", "LINE_TRACK"}
+                or self.planner.ball_lock_active or self.planner.goal_lock_active
+                or self.general_motion_gate.locked and self.active_general_source != "line"
+                or not FinishRun.near(payload, self.planner.hurdle_planner.config.min_confidence)):
+            return
+        run.latched = True
+        self.phase_manager.set_phase(FinishRun.PHASE)
+        self.hurdle_positioning_entry_pending = False
+        self.pending_hurdle_final_sequence = None
+        self.hurdle_post_motion_dwell_until = None
+        self.pending_line_decision = None
+        self.pending_line_corner = None
+        self.get_logger().info(
+            f"Third hurdle finish run latched: depth_m={payload['depth_m']}; "
+            "repeat line_forward_6 without vision or dwell until stopped"
+        )
+
+    def _publish_finish_run(self, now: float) -> None:
+        """Feed the existing SDK queue without a perception or dwell boundary."""
+        run = self.finish_run
+        MotionDecisionNode._check_executor_heartbeat(self, now)
+        if (run.fault or self.safety_interlock.latched or not self.decision_started
+                or not self.executor_heartbeat_watchdog.executor_seen
+                or not self.executor_auto_ready):
+            return
+        # Finish any already accepted pre-entry command, including its reservation.
+        if (self.general_motion_gate.locked or self.active_special_command_id is not None
+                or getattr(self, "queued_general_command_id", None) is not None
+                or not MotionDecisionNode._command_publisher_has_subscriber(self)
+                or not run.can_send(now)):
+            return
+        decision = MotionDecision(
+            phase=FinishRun.PHASE, source="line", action=FinishRun.ACTION, valid=True,
+            reason="third_hurdle_finish_forward_until_stopped",
+            sdk_motion_requested=False, requires_ack=False,
+            source_command={"finish_run": True, "hurdle_mode_index": 3,
+                            "head_down_requested": False, "repeat_count": 6},
+        )
+        self.command_id += 1
+        payload = {**decision.to_dict(), "command_id": self.command_id, "event_id": None,
+                   "mission_progress": self._mission_progress(),
+                   "source_node": "motion_decision_node"}
+        run.sent(self.command_id, now)
+        self.last_selected_decision = decision
+        self.last_candidate_decision = decision
+        self.publisher.publish(String(data=json.dumps(payload, separators=(",", ":"))))
+
     def _latch_hurdle_positioning_entry(self, payload: dict[str, Any]) -> None:
         """Remember the near crossing without interrupting an active motion."""
+        if FinishRun.armed(self.phase_manager):
+            MotionDecisionNode._latch_finish_run(self, payload)
+            return
         if (
             getattr(self, "hurdle_positioning_entry_pending", False)
             or self.mission_phase == "HURDLE_POSITIONING"
@@ -2693,6 +2783,9 @@ class MotionDecisionNode(Node):
             )
 
     def _phase_callback(self, message: String) -> None:
+        if getattr(getattr(self, "finish_run", None), "latched", False):
+            self.get_logger().warning("Finish run is latched until node restart")
+            return
         phase = message.data.strip()
 
         if not phase:
@@ -2844,6 +2937,21 @@ class MotionDecisionNode(Node):
         dynamics_command = payload.get(
             "dynamics_command"
         )
+
+        run = getattr(self, "finish_run", None)
+        if run is not None and run.observe(payload, status_receive_monotonic):
+            MotionDecisionNode._latch_critical_executor_fault(
+                self, error_code=error_code, message=status_message, action=action,
+                command_id=command_id, event_id=event_id,
+            )
+            MotionDecisionNode._publish_finish_run(self, status_receive_monotonic)
+            return
+        if (run is not None and run.latched
+                and status in {"FAILED", "TIMEOUT", "REJECTED", "CANCELED", "CANCELLED", "UNSUPPORTED"}
+                and command_id is not None
+                and command_id in {self.general_motion_gate.active_command_id,
+                                   getattr(self, "queued_general_command_id", None)}):
+            run.fault = "finish_entry_motion_failed"
 
         MotionDecisionNode._record_ball_entry_reservation_status(self, payload, status_receive_monotonic)
         if normalize_general_action(action) is not None:
@@ -3290,7 +3398,8 @@ class MotionDecisionNode(Node):
                     gate.required_vision_generation = gate.vision_generation
                 if (
                     completed_source == "hurdle"
-                    and self.mission_phase == "HURDLE_POSITIONING"
+                    and (self.mission_phase == "HURDLE_POSITIONING"
+                         or action == "HURDLE_LOST_BACKWARD_2")
                 ) or (
                     completed_source in {"line", "hurdle"}
                     and getattr(self, "hurdle_positioning_entry_pending", False)
@@ -4160,6 +4269,11 @@ class MotionDecisionNode(Node):
             progress[f"ball_{ball_index}_grasp_result"] = (
                 self.phase_manager.grasp_result_for_ball(ball_index)
             )
+        run = getattr(self, "finish_run", None)
+        progress["finish_run_armed"] = FinishRun.armed(self.phase_manager)
+        progress["finish_run_latched"] = bool(run and run.latched)
+        progress["finish_run_fault"] = run.fault if run else None
+        progress["finish_forward_batches_completed"] = run.completed_batches if run else 0
         return progress
 
     def _invalidate_post_ball_line_input(self) -> None:
@@ -5267,7 +5381,7 @@ class MotionDecisionNode(Node):
                 config = (config[0], 3)
             elif MotionDecisionNode._post_pickup_line_action(action):
                 if action == "LINE_SPARSE_FORWARD":
-                    config = (.514 * 2, 3)
+                    config = (.514 * 2 / 1.05, 3)
                 else:
                     suffix = action.rsplit("_", 1)[-1]
                     count = int(suffix) if suffix.isdigit() else (2 if suffix == "LEFT" else 5)
@@ -5275,7 +5389,7 @@ class MotionDecisionNode(Node):
         if config is None and self.mission_phase == "POST_SHOT_LINE_ALIGN":
             config = MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG.get(action)
         if action == "POST_SHOT_FORWARD":
-            config = (.514 * 6, 3)
+            config = (.644 * 6, 3)
         elif action in MotionDecisionNode.POST_SHOT_EXIT_CAPTURE_CONFIG:
             config = MotionDecisionNode.POST_SHOT_EXIT_CAPTURE_CONFIG[action]
         self.pending_line_decision = None
@@ -5560,13 +5674,15 @@ class MotionDecisionNode(Node):
 
     def _hurdle_approach_preview(self, observations: dict, now: float) -> dict | None:
         """Preview far Hurdle walking from a capture taken late in the current gait."""
+        if FinishRun.armed(self.phase_manager):
+            return None
         gate = self.general_motion_gate
         if (self.active_general_source not in {"line", "hurdle"}
                 or self.mission_phase not in {"AUTO", "LINE_TRACK", "HURDLE_APPROACH"}
                 or not gate.locked or self.active_special_command_id is not None
                 or getattr(self, "queued_general_command_id", None) is not None
                 or getattr(self, "hurdle_positioning_entry_pending", False)
-                or self.planner.hurdle_lock_active or self.planner.hurdle_planner.fine_approach_active
+                or self.planner.hurdle_planner.fine_approach_active
                 or MotionDecisionNode._ball_entry_line_active(self)
                 or getattr(self, "ball_approach_entry_pending", False)
                 or getattr(self, "ball_pickup_entry_pending", False)
@@ -5667,7 +5783,7 @@ class MotionDecisionNode(Node):
         if info.get("depth_valid") is not True or depth is None or depth <= fine_distance:
             return None
         if source == "hurdle":
-            if self.planner.hurdle_lock_active or self.planner.hurdle_planner.fine_approach_active:
+            if self.planner.hurdle_planner.fine_approach_active:
                 return None
             info = {**info, **build_hurdle_path_reference(info, observations.get("line")),
                     "hurdle_positioning_active": False}
@@ -6375,7 +6491,8 @@ class MotionDecisionNode(Node):
             return None
         hurdle = observations.get("hurdle")
         hurdle_enabled = (
-            self.phase_manager.hurdles_completed < self.phase_manager.required_hurdles
+            not FinishRun.armed(self.phase_manager)
+            and self.phase_manager.hurdles_completed < self.phase_manager.required_hurdles
             and not self.phase_manager.execution_limit_reached("GO")
             and not self.planner.hurdle_mission_disabled
             and not self.planner.hurdle_ignore_until_clear
@@ -6632,6 +6749,8 @@ class MotionDecisionNode(Node):
         ):
             return False
         for source in ("ball", "goal", "hurdle", "finish"):
+            if source == "hurdle" and FinishRun.armed(self.phase_manager):
+                continue
             if source == "ball" and MotionDecisionNode._ball_entry_line_active(self):
                 continue
             if self.mission_phase == "LINE_TRACK_AFTER_PICKUP" and source in {"ball", "goal"}:
@@ -6832,6 +6951,9 @@ class MotionDecisionNode(Node):
         queue_while_locked: bool = False,
     ) -> None:
         now = time.monotonic()
+        if getattr(getattr(self, "finish_run", None), "latched", False):
+            MotionDecisionNode._publish_finish_run(self, now)
+            return
         clock_ready = MotionDecisionNode._check_vision_clock(self, now)
         camera_ready = MotionDecisionNode._camera_recovery_ready(self, now)
         MotionDecisionNode._update_goal_stationary_time(self, now)
@@ -7759,6 +7881,11 @@ class MotionDecisionNode(Node):
             payload = {
                 "phase": self.mission_phase,
                 "vision_clock_recovering": getattr(getattr(self, "vision_time_guard", None), "recovering", False),
+                "finish_run": {
+                    "latched": bool(getattr(getattr(self, "finish_run", None), "latched", False)),
+                    "fault": getattr(getattr(self, "finish_run", None), "fault", None),
+                    "completed_batches": getattr(getattr(self, "finish_run", None), "completed_batches", 0),
+                },
                 "camera_recovery": ({
                     **self.camera_recovery.status,
                     "reason": self.camera_recovery.reason,
@@ -7987,7 +8114,10 @@ class MotionDecisionNode(Node):
         now: float,
     ) -> bool:
         """Recheck fresh decisions while settling before turns or fine steps."""
-        if decision.source == "hurdle" and decision.source_command.get("hurdle_near_control") is True:
+        if decision.source == "hurdle" and (
+            decision.source_command.get("hurdle_near_control") is True
+            or decision.source_command.get("hurdle_camera_down_control") is True
+        ):
             stationary = getattr(self, "hurdle_stationary_since", None)
             self._reset_pre_motion_settle()
             if stationary is None:
@@ -8382,6 +8512,8 @@ class MotionDecisionNode(Node):
     ) -> MotionDecision:
         """Keep compatibility phases while disabling automatic finish actions."""
         MotionDecisionNode._observe_ball_mode_confirmation(self, observations.get("ball"))
+        if FinishRun.armed(self.phase_manager):
+            observations = {**observations, "hurdle": None}
         if self.mission_complete or self.mission_phase == "FINISHED":
             return MotionDecision(
                 phase="FINISHED",

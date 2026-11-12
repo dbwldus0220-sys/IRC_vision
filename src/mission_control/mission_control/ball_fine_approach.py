@@ -46,7 +46,7 @@ def duration_sec(identifier):
     if identifier == 'ball_align_fine_forward_45_5':
         return .394 * 5 / 1.05
     if identifier == 'ball_align_forward_2':
-        return .514 * 2
+        return .514 * 2 / 1.05
     if identifier.startswith('ball_align_turn_'):
         count = int(identifier.rsplit('_', 1)[1])
         return camera45_turn_duration_sec('LEFT' if '_left_' in identifier else 'RIGHT', count)

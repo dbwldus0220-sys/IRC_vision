@@ -1,0 +1,543 @@
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+......................................................................FF [ 39%]
+FFFFFF.................................................................. [ 49%]
+........................................................................ [ 59%]
+FF....FFFFFFFFFFFFFFFFFFFFFFFFFFFF.FF................FF................. [ 69%]
+............................................................FFFFFFFFFFFF [ 79%]
+FFFFF.FF................................................................ [ 89%]
+...........................................FFFF...............F.F.F.FF.. [ 99%]
+....F                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_____ test_late_queue_does_not_reuse_early_or_unusable_input[low_quality] ______
+src/mission_control/test/test_line_recovery_late_queue.py:73: in test_late_queue_does_not_reuse_early_or_unusable_input
+    assert getattr(node, 'queued_general_command_id', None) is None
+E   AssertionError: assert 2 is None
+E    +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92145a80>, 'queued_general_command_id', None)
+_________ test_late_queue_does_not_reuse_early_or_unusable_input[lost] _________
+src/mission_control/test/test_line_recovery_late_queue.py:73: in test_late_queue_does_not_reuse_early_or_unusable_input
+    assert getattr(node, 'queued_general_command_id', None) is None
+E   AssertionError: assert 2 is None
+E    +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92ba7f40>, 'queued_general_command_id', None)
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-0] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5--30] ____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-30] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-0] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0--30] ____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-30] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10] ____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0] _____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+___ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10] ____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10] ____
+src/mission_control/test/test_continuous_approach.py:68: in test_goal_walking_queues_only_one_then_promotes_without_pause
+    first = start_goal(node, clock, depth, angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes0] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes1] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes2] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes3] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes4] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes5] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes6] __
+src/mission_control/test/test_continuous_approach.py:96: in test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat
+    start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+__________ test_goal_queue_rejects_frames_captured_before_late_window __________
+src/mission_control/test/test_continuous_approach.py:108: in test_goal_queue_rejects_frames_captured_before_late_window
+    start_goal(node, clock, .570)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_______ test_goal_failure_clears_reserved_motion_and_requires_new_vision _______
+src/mission_control/test/test_continuous_approach.py:118: in test_goal_failure_clears_reserved_motion_and_requires_new_vision
+    first = start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_____ test_goal_forward_without_reservation_uses_recent_frame_immediately ______
+src/mission_control/test/test_continuous_approach.py:131: in test_goal_forward_without_reservation_uses_recent_frame_immediately
+    first = start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_______________ test_goal_forward_does_not_reuse_expired_vision ________________
+src/mission_control/test/test_continuous_approach.py:141: in test_goal_forward_does_not_reuse_expired_vision
+    first = start_goal(node, clock, 1.5)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_goal_forward_and_recovery_queue_each_other[0-30-GOAL_CAMERA90_RECOVER_RIGHT_4] _
+src/mission_control/test/test_continuous_approach.py:156: in test_goal_forward_and_recovery_queue_each_other
+    first = start_goal(node, clock, 1.0, initial_angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_goal_forward_and_recovery_queue_each_other[0--30-GOAL_CAMERA90_RECOVER_LEFT_4] _
+src/mission_control/test/test_continuous_approach.py:156: in test_goal_forward_and_recovery_queue_each_other
+    first = start_goal(node, clock, 1.0, initial_angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_goal_forward_and_recovery_queue_each_other[30-0-GOAL_CAMERA_90_FORWARD_2] _
+src/mission_control/test/test_continuous_approach.py:156: in test_goal_forward_and_recovery_queue_each_other
+    first = start_goal(node, clock, 1.0, initial_angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_goal_forward_and_recovery_queue_each_other[-30-30-GOAL_CAMERA90_RECOVER_RIGHT_4] _
+src/mission_control/test/test_continuous_approach.py:156: in test_goal_forward_and_recovery_queue_each_other
+    first = start_goal(node, clock, 1.0, initial_angle)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+________ test_goal_prequeue_requires_three_consecutive_matching_actions ________
+src/mission_control/test/test_continuous_approach.py:177: in test_goal_prequeue_requires_three_consecutive_matching_actions
+    first = start_goal(node, clock, 1.0)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False] _
+src/mission_control/test/test_continuous_approach.py:198: in test_bridge_reserves_different_goal_lengths_without_post_motion_dwell
+    assert bridge.queued_request_deferred is deferred
+E   assert True is False
+E    +  where True = <test_motion_command_bridge.FakeBridge object at 0xffff926989a0>.queued_request_deferred
+_________ test_goal_preparation_status_does_not_start_forward_capture __________
+src/mission_control/test/test_continuous_approach.py:218: in test_goal_preparation_status_does_not_start_forward_capture
+    assert node.goal_forward_started_at == clock[0]
+E   AttributeError: 'LiveInputHarness' object has no attribute 'goal_forward_started_at'
+______ test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency ______
+src/mission_control/test/test_continuous_approach.py:324: in test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency
+    first = start_goal(node, clock, .57)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_________ test_goal_reservation_cannot_count_one_image_multiple_times __________
+src/mission_control/test/test_continuous_approach.py:345: in test_goal_reservation_cannot_count_one_image_multiple_times
+    start_goal(node, clock, .57)
+src/mission_control/test/test_continuous_approach.py:32: in start_goal
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E   KeyError: 'WAIT'
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1--35.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 16.88142857142857 == 17.08142857142857 ± 1.7e-05
+E    +  where 16.88142857142857 = <test_motion_command_bridge.FakeBridge object at 0xffff92c13ee0>.transition_dwell_until
+E    +  and   17.08142857142857 ± 1.7e-05 = <function approx at 0xffffa408b5b0>((16.58142857142857 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-35.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92bb0160>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1--89.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 17.895714285714288 == 18.095714285714287 ± 1.8e-05
+E    +  where 17.895714285714288 = <test_motion_command_bridge.FakeBridge object at 0xffff92c116c0>.transition_dwell_until
+E    +  and   18.095714285714287 ± 1.8e-05 = <function approx at 0xffffa408b5b0>((17.595714285714287 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2--89.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 17.895714285714288 == 18.095714285714287 ± 1.8e-05
+E    +  where 17.895714285714288 = <test_motion_command_bridge.FakeBridge object at 0xffff92bb1630>.transition_dwell_until
+E    +  and   18.095714285714287 ± 1.8e-05 = <function approx at 0xffffa408b5b0>((17.595714285714287 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-15.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92c10eb0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-30.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92c15840>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-45.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92c16d70>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-60.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92c13eb0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-75.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff926a31c0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-89.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92c13b50>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-15.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff926a17b0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-30.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff926a3880>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-45.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff921459f0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-60.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92bb04f0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-75.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92ba45b0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+__ test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-89.0] __
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 13.247142857142858 == 13.447142857142858 ± 1.3e-05
+E    +  where 13.247142857142858 = <test_motion_command_bridge.FakeBridge object at 0xffff92758be0>.transition_dwell_until
+E    +  and   13.447142857142858 ± 1.3e-05 = <function approx at 0xffffa408b5b0>((12.947142857142858 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[False-1--35.0] _
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 15.205238095238098 == 15.405238095238097 ± 1.5e-05
+E    +  where 15.205238095238098 = <test_motion_command_bridge.FakeBridge object at 0xffff92c10f10>.transition_dwell_until
+E    +  and   15.405238095238097 ± 1.5e-05 = <function approx at 0xffffa408b5b0>((14.905238095238097 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[False-1--89.0] _
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 15.205238095238098 == 15.405238095238097 ± 1.5e-05
+E    +  where 15.205238095238098 = <test_motion_command_bridge.FakeBridge object at 0xffff921467d0>.transition_dwell_until
+E    +  and   15.405238095238097 ± 1.5e-05 = <function approx at 0xffffa408b5b0>((14.905238095238097 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_forward_two_and_turn_reservations_keep_correction_dwells[False-2--89.0] _
+src/mission_control/test/test_ball_fine_alignment_queue.py:88: in test_forward_two_and_turn_reservations_keep_correction_dwells
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+E   assert 15.205238095238098 == 15.405238095238097 ± 1.5e-05
+E    +  where 15.205238095238098 = <test_motion_command_bridge.FakeBridge object at 0xffff92c16b30>.transition_dwell_until
+E    +  and   15.405238095238097 ± 1.5e-05 = <function approx at 0xffffa408b5b0>((14.905238095238097 + 0.5))
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles1] _
+src/mission_control/test/test_object_walk_prequeue.py:63: in test_object_walk_queues_once_and_bridge_promotes_without_dwell
+    assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2] _
+src/mission_control/test/test_object_walk_prequeue.py:63: in test_object_walk_queues_once_and_bridge_promotes_without_dwell
+    assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+E   AssertionError: assert 'STRAIGHT_3' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E     - RECOVER_RIGHT_TURN_RIGHT_4
+E     + STRAIGHT_3
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles3] _
+src/mission_control/test/test_object_walk_prequeue.py:63: in test_object_walk_queues_once_and_bridge_promotes_without_dwell
+    assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4] _
+src/mission_control/test/test_object_walk_prequeue.py:63: in test_object_walk_queues_once_and_bridge_promotes_without_dwell
+    assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+E   AssertionError: assert 'STRAIGHT_3' == 'RECOVER_LEFT_TURN_LEFT_4'
+E     - RECOVER_LEFT_TURN_LEFT_4
+E     + STRAIGHT_3
+___ test_object_queue_is_discarded_on_failure[FAILED-hurdle-HURDLE_APPROACH] ___
+src/mission_control/test/test_object_walk_prequeue.py:118: in test_object_queue_is_discarded_on_failure
+    assert node.queued_general_command_id is not None
+E   AttributeError: 'LiveInputHarness' object has no attribute 'queued_general_command_id'
+_ test_object_queue_is_discarded_on_failure[CANCELLED-hurdle-HURDLE_APPROACH] __
+src/mission_control/test/test_object_walk_prequeue.py:118: in test_object_queue_is_discarded_on_failure
+    assert node.queued_general_command_id is not None
+E   AttributeError: 'LiveInputHarness' object has no attribute 'queued_general_command_id'
+__ test_object_queue_is_discarded_on_failure[TIMEOUT-hurdle-HURDLE_APPROACH] ___
+src/mission_control/test/test_object_walk_prequeue.py:118: in test_object_queue_is_discarded_on_failure
+    assert node.queued_general_command_id is not None
+E   AttributeError: 'LiveInputHarness' object has no attribute 'queued_general_command_id'
+_ test_without_reservation_completion_dispatches_recent_walk_immediately[hurdle-HURDLE_APPROACH] _
+src/mission_control/test/test_object_walk_prequeue.py:134: in test_without_reservation_completion_dispatches_recent_walk_immediately
+    assert second['valid'] and second['action'] == ('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert (True and 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^)
+_ test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH] _
+src/mission_control/test/test_object_walk_prequeue.py:147: in test_recovery_to_recovery_waits_until_last_point_three_seconds
+    assert getattr(node, 'queued_general_command_id', None) is None
+E   AssertionError: assert 2 is None
+E    +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9273b760>, 'queued_general_command_id', None)
+___________ test_all_reservation_estimates_and_aliases_match_catalog ___________
+src/mission_control/test/test_forward_recovery_speed105.py:104: in test_all_reservation_estimates_and_aliases_match_catalog
+    assert estimate == pytest.approx(seconds(Bridge.ACTION_TO_MOTION_ID[action])), action
+E   AssertionError: STRAIGHT
+E   assert 1.958095238095238 == 2.937142857142857 ± 2.9e-06
+E    +  where 2.937142857142857 ± 2.9e-06 = <function approx at 0xffffa408b5b0>(2.937142857142857)
+E    +    where <function approx at 0xffffa408b5b0> = pytest.approx
+E    +    and   2.937142857142857 = <function test_all_reservation_estimates_and_aliases_match_catalog.<locals>.seconds at 0xffff926fcca0>('line_forward_6')
+- generated xml file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261112_forward_recovery_speed105/updated.xml -
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2]
+FAILED src/mission_control/test/test_line_recovery_late_queue.py::test_late_queue_does_not_reuse_early_or_unusable_input[low_quality]
+FAILED src/mission_control/test/test_line_recovery_late_queue.py::test_late_queue_does_not_reuse_early_or_unusable_input[lost]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5--30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0--30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes1]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes2]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes3]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes5]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes6]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_queue_rejects_frames_captured_before_late_window
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_failure_clears_reserved_motion_and_requires_new_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_without_reservation_uses_recent_frame_immediately
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_does_not_reuse_expired_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0-30-GOAL_CAMERA90_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0--30-GOAL_CAMERA90_RECOVER_LEFT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[30-0-GOAL_CAMERA_90_FORWARD_2]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[-30-30-GOAL_CAMERA90_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_prequeue_requires_three_consecutive_matching_actions
+FAILED src/mission_control/test/test_continuous_approach.py::test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_preparation_status_does_not_start_forward_capture
+FAILED src/mission_control/test/test_continuous_approach.py::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_reservation_cannot_count_one_image_multiple_times
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1--35.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-35.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1--89.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2--89.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-15.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-30.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-45.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-60.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-75.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-1-89.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-15.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-30.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-45.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-60.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-75.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[True-2-89.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[False-1--35.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[False-1--89.0]
+FAILED src/mission_control/test/test_ball_fine_alignment_queue.py::test_forward_two_and_turn_reservations_keep_correction_dwells[False-2--89.0]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles1]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles3]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_queue_is_discarded_on_failure[FAILED-hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_queue_is_discarded_on_failure[CANCELLED-hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_queue_is_discarded_on_failure[TIMEOUT-hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_without_reservation_completion_dispatches_recent_walk_immediately[hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_forward_recovery_speed105.py::test_all_reservation_estimates_and_aliases_match_catalog
+71 failed, 654 passed in 18.21s

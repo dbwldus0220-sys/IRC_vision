@@ -14,7 +14,7 @@ PICKUP_CRAB_DURATIONS = {
     'pickup_crab_right_0_2': 2 * .550 / 1.0,
 }
 PICKUP_WALK_DURATIONS = {
-    'ball_camera_down_forward_2': .514 * 2,
+    'ball_camera_down_forward_2': .514 * 2 / 1.05,
     'ball_general_fine_forward_8': .394 * 5 / 1.05,
     'pickup_fine_forward_0': .394 * 5 / 1.05,
     **PICKUP_CRAB_DURATIONS,

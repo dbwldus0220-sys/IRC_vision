@@ -172,7 +172,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 11)
-        self.declare_parameter("backboard_line_width_m", 0.155)
+        self.declare_parameter("backboard_line_width_m", 0.17)
         self.declare_parameter("backboard_sample_y_ratio", 0.18)
         self.declare_parameter("backboard_edge_inset_ratio", 0.10)
         self.declare_parameter("backboard_parallel_tolerance_deg", 3.0)

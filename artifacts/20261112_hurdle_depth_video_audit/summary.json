@@ -1,0 +1,22 @@
+{
+  "scope": "2026-11-11 and 2026-11-12 Screencasts directory recordings",
+  "videos_reviewed": 27,
+  "duration_minutes": 89.79233333333335,
+  "matched_camera_hold_request_count": 22,
+  "matched_request_video_count": 13,
+  "sample_count": 6,
+  "mean_depth_z_m": 0.5333333333333333,
+  "median_depth_z_m": 0.535,
+  "min_depth_z_m": 0.48,
+  "max_depth_z_m": 0.58,
+  "method_ko": "전환 주변을 약 0.45초 이상 간격으로 추출하고 수동 판독. 화면이 아래쪽 시야로 바뀐 뒤 약 2초 이내에서 hurdle_angle_0와 유효 Depth Z를 함께 확인할 수 있는 첫 추출 프레임을 사건별 1개 선택. 선행 후진 복구가 있는 사건은 제외. 로그의 camera hold depth는 전환 전 트리거 값이므로 평균에 사용하지 않음.",
+  "limitations_ko": [
+    "카메라 엔코더 및 원본 RGB/depth 타임스탬프를 동기화한 측정이 아님. 각 사건의 물리적 카메라 정지 순간은 확정할 수 없음.",
+    "일부 선택 프레임에는 후속 전진이 이미 시작되어 있을 수 있음. 엄밀한 정지 직후 평균이 아닌 전환 직후 주변의 참고 평균.",
+    "미검출, 0도 관측 확인 불가, 늦은 재검출 또는 복구 뒤 관측 등은 제외하므로 전체 시행 평균으로 일반화하지 말 것.",
+    "화면은 소수점 두 자리 depth를 표시하며, angle_source는 소프트웨어 관측 기준이지 실제 카메라 엔코더 증거가 아님.",
+    "초기 영상은 bottom pixel 기준, 후반 영상은 580mm 기준으로 전환 정책이 서로 다름.",
+    "로그 없는 영상은 10초 간격 개요로 확인. 11월11일12:13:19 영상은 브라우저 창으로 일부 표시가 가려져 추가 전환을 배제할 수 없음."
+  ],
+  "specific_wait_event_ko": "11월12일02:30:08 영상의 두 번째 허들은 카메라가 내려간 뒤 SEARCH이며 Depth Z가 표시되지 않아 평균에서 제외. 로그 0.564m는 카메라 내림 요청 시점 값임."
+}

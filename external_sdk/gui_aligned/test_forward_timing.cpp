@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
     for (const std::string name : {
         "m전진45(2회)", "m전진0도(2회)",
-        "m전진45(6회)", "m전진0도(4회)", "m전진90도(4회)",
+        "최종전진", "m전진0도(4회)", "m전진90도(4회)",
         "m라인복귀좌회전45도", "m라인복귀우회전45도",
         "m라인복귀좌회전공용", "m라인복귀우회전공용",
         "turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전",
@@ -347,7 +347,7 @@ int main(int argc, char** argv) {
     if (argc == 3) {
         const auto catalog = MotionLibrary::loadGuiJson(argv[2]);
         const std::vector<std::string> forwards = {
-            "m전진45(2회)", "m전진45(4회)", "m전진45(6회)", "m전진45(8회)",
+            "m전진45(2회)", "m전진45(4회)", "최종전진", "m전진45(8회)",
             "m전진90도(1회)", "m전진90도(2회)", "m전진90도(3회)", "m전진90도(4회)", "m전진90도(6회)",
             "m전진0도(2회)", "m전진0도(4회)", "m전진0도(6회)",
         };
@@ -381,7 +381,8 @@ int main(int argc, char** argv) {
             // into Line/Goal is not an authorized seamless transition.
             const bool crosses_zero_camera = first.starts_with("m전진0도(")
                 != second.starts_with("m전진0도(");
-            if (crosses_zero_camera || (!fixed_head
+            const bool crosses_final = (first == "최종전진") != (second == "최종전진");
+            if (crosses_zero_camera || crosses_final || (!fixed_head
                     && end.at(0) != catalog.motion(second).frames().back().angles.at(0))) {
                 assert(player.queueNext(second) == QueueResult::IncompatibleTransition);
                 continue;

@@ -189,17 +189,59 @@ int main(int argc, char** argv) {
             }
         }
     }
-    // Source101 recovery names must retain forward/recovery reservations at every boundary.
+    // Source103 right turns retain all camera/count variants and queue boundaries.
+    for (int camera : {0, 45, 90}) {
+        const auto name = [camera](int count) {
+            return "t제자리우회전" + std::to_string(camera) + "도("
+                + std::to_string(count) + "회)";
+        };
+        for (int first : {1, 2, 3, 4, 5, 6, 7, 9}) {
+            for (int second : {1, 2, 3, 4, 5, 6, 7, 9})
+                check_pair(name(first), name(second));
+            if (camera == 45) {
+                for (const std::string gait : {"m전진45(2회)", "m라인복귀좌회전45도",
+                                               "m라인복귀우회전45도"}) {
+                    check_pair(gait, name(first));
+                    check_pair(name(first), gait);
+                }
+                check_pair(name(first), "p오뒤에서 미세오뒤(45도)");
+                check_pair("p미세오뒤에서 오뒤45도", name(first));
+            }
+        }
+    }
+    // All ordinary forward/recovery variants must queue at the requested 1.05 speed.
     const std::vector<std::vector<std::string>> walking_groups{
-        {"m전진45(2회)", "m전진45(4회)", "m전진45(6회)", "m전진45(8회)",
+        {"m전진45(2회)", "m전진45(4회)", "m전진45(8회)",
          "m라인복귀좌회전45도", "m라인복귀좌회전공용", "m라인복귀우회전45도", "m라인복귀우회전공용"},
-        {"m전진90도(2회)", "m전진90도(4회)", "m전진90도(6회)",
+        {"m전진90도(1회)", "m전진90도(2회)", "m전진90도(3회)",
+         "m전진90도(4회)", "m전진90도(6회)",
          "m라인복귀좌회전90도", "m라인복귀우회전90"},
-        {"m전진0도(4회)", "m전진0도(6회)"},
+        {"m전진0도(2회)", "m전진0도(4회)", "m전진0도(6회)"},
     };
-    for (const auto& group : walking_groups)
+    for (const auto& group : walking_groups) {
+        for (const auto& name : group)
+            assert(catalog.motion(name).playbackSpeed() == 1.05);
         for (const auto& first : group)
             for (const auto& second : group) check_pair(first, second);
+    }
+    // Source106 repeats keep SDK continuity; mixed camera/speed changes go through the bridge.
+    assert(catalog.motion("최종전진").durationMs() == 644);
+    assert(catalog.motion("최종전진").playbackSpeed() == 1.0);
+    for (bool fixed_head : {false, true}) {
+        check_pair("최종전진", "최종전진", fixed_head);
+        for (const std::string other : {"m전진45(2회)", "m전진45(4회)", "m전진45(8회)",
+                                       "m라인복귀좌회전45도", "m라인복귀우회전45도"}) {
+            for (bool reverse : {false, true}) {
+                BallQueueHardware hardware;
+                RobotMotionPlayer player(argv[1], hardware);
+                assert(player.initialize());
+                if (fixed_head) player.setJointOverride(0, 1.);
+                assert(player.start(reverse ? other : "최종전진") == StartResult::Accepted);
+                assert(player.queueNext(reverse ? "최종전진" : other)
+                       == QueueResult::IncompatibleTransition);
+            }
+        }
+    }
     // Goal navigation uses camera-45 recovery data with an executor head override.
     for (const std::string forward : {"m전진90도(2회)", "m전진90도(4회)", "m전진90도(6회)"})
         for (const std::string recovery : {"m라인복귀좌회전45도", "m라인복귀우회전45도"}) {
@@ -224,7 +266,14 @@ int main(int argc, char** argv) {
 
     // The bridge dispatches posture changes and direction changes after completion,
     // not through queueNext. Exercise these real SDK start/completion boundaries.
+    assert(catalog.motion("n공에서 전진하고 후진준비자세").durationMs() == 939);
     for (const auto& sequence : std::vector<std::vector<std::string>>{
+        {"m전진0도(2회)", "n공에서 전진하고 후진준비자세",
+         "찐공잡기전후진-2(2회)", "r공잡기 400", "n공확인자세",
+         "t공후 제자리우회전"},
+        {"m라인복귀좌회전공용", "n공에서 전진하고 후진준비자세",
+         "찐공잡기전후진-2(2회)", "r공잡기500", "n공확인자세",
+         "p공후 제자리좌회전"},
         {"찐공잡기전후진-2(2회)", "r공잡기 400", "n공확인자세",
          "t공후 제자리우회전", "m전진45(4회)"},
         {"R골넣기1번구역", "t골대후제자리우회전", "m전진45(4회)"},
@@ -234,13 +283,13 @@ int main(int argc, char** argv) {
          "m전진45(4회)"},
         {"찐공잡기전후진-2(2회)", "r공잡기500", "n공확인자세",
          "p공후 제자리좌회전", "m전진45(4회)"},
-        {"p미세0도(10회)", "t허들찐", "m전진45(6회)"},
+        {"p미세0도(10회)", "t허들찐", "최종전진"},
         {"p미세0도(5회)", "p미세오뒤에서 오뒤0도", "m라인복귀좌회전45도",
          "p오뒤에서 미세오뒤(0도)", "p미세0도(5회)", "p미세0도(10회)",
-         "t허들찐", "m전진45(6회)"},
+         "t허들찐", "최종전진"},
         {"p미세0도(5회)", "p미세오뒤에서 오뒤45도", "m라인복귀우회전45도",
          "p오뒤에서 미세오뒤(45도)", "p미세0도(5회)", "p미세0도(10회)",
-         "t허들찐", "m전진45(6회)"},
+         "t허들찐", "최종전진"},
         {"n공확인자세", "p공후 제자리좌회전", "m전진45(4회)"},
         {"R골넣기1번구역", "p골대후제자리좌회전", "m전진45(4회)"},
         {"R골넣기2번구역", "p골대후제자리좌회전", "m전진45(4회)"},
@@ -283,6 +332,6 @@ int main(int argc, char** argv) {
                  "24 walking/preparation pairs, 93 forward/recovery pairs, "
                  "16 crab queue pairs, four crab chains, three camera transition chains, "
                  "five source79 exit chains, two source80 pickup chains, hurdle exit, "
-                 "two hurdle fine/recovery chains, "
+                 "two hurdle fine/recovery chains, two source105 preparation chains, "
                  "12 goal head-override pairs and rejected shortcuts passed\n";
 }

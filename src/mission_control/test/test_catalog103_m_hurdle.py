@@ -11,6 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261112_catalog103'
+DEPLOYED = ROOT / 'artifacts/20261112_forward_recovery_speed105/before'
 MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
 sys.path.insert(0, str(ROOT / 'tools'))
 from upsert_motion_catalog import runtime_motion_from_source
@@ -30,7 +31,7 @@ def test_source_data_counts_camera_and_unchanged_motions(kind):
     assert hashlib.sha256(source_path.read_bytes()).hexdigest() == MANIFEST['source_sha256']
     source = catalog(source_path)
     relative = f'artifacts/robot_motions_{kind}.json'
-    before, after = catalog(UPDATE / 'before' / relative), catalog(ROOT / relative)
+    before, after = catalog(UPDATE / 'before' / relative), catalog(DEPLOYED / relative)
     renames = MANIFEST['renames']
     assert len(renames) == 18
     assert len(MANIFEST['replaced']) == 24
@@ -62,8 +63,8 @@ def test_source_data_counts_camera_and_unchanged_motions(kind):
 
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
 def test_embedded_gaits_preserve_turns_preparation_and_effective_speed(kind):
-    pc = catalog(ROOT / 'artifacts/robot_motions_pc.json')
-    after = catalog(ROOT / f'artifacts/robot_motions_{kind}.json')
+    pc = catalog(DEPLOYED / 'artifacts/robot_motions_pc.json')
+    after = catalog(DEPLOYED / f'artifacts/robot_motions_{kind}.json')
     before = catalog(UPDATE / 'before' / f'artifacts/robot_motions_{kind}.json')
     for turn, recovery, blocks in GOAL_EXIT_RECOVERIES:
         expected = build_exit(pc[turn], pc[recovery], blocks,
@@ -100,9 +101,9 @@ def test_embedded_gaits_preserve_turns_preparation_and_effective_speed(kind):
 def test_aliases_keep_public_commands_and_resolve():
     relative = 'src/irc_step_motion_executor/config/motion_aliases.yaml'
     before = yaml.safe_load((UPDATE / 'before' / relative).read_text())['motion_aliases']
-    after = yaml.safe_load((ROOT / relative).read_text())['motion_aliases']
+    after = yaml.safe_load((DEPLOYED / relative).read_text())['motion_aliases']
     assert after == {key: MANIFEST['renames'].get(name, name) for key, name in before.items()}
-    assert set(after.values()) <= catalog(ROOT / 'artifacts/robot_motions_runtime.json').keys()
+    assert set(after.values()) <= catalog(DEPLOYED / 'artifacts/robot_motions_runtime.json').keys()
 
 
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
@@ -117,7 +118,7 @@ def test_hurdle_matches_source_once_scaled_and_preserves_exit(kind):
             expected[key] += '(catalog80)'
     if kind == 'runtime':
         expected = runtime_motion_from_source(expected)
-    after = catalog(ROOT / f'artifacts/robot_motions_{kind}.json')['t허들찐']
+    after = catalog(DEPLOYED / f'artifacts/robot_motions_{kind}.json')['t허들찐']
     before = catalog(UPDATE / 'before' / f'artifacts/robot_motions_{kind}.json')['t허들찐']
     assert after == expected
     assert after['repeat_count'] == 1

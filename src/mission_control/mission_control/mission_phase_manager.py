@@ -44,6 +44,7 @@ class MissionPhaseManager:
             "POST_SHOT_FORWARD",
             "HURDLE_APPROACH",
             "HURDLE_POSITIONING",
+            "HURDLE_FINISH_RUN",
             "LINE_TRACK",
             "FINISH",
             "WALK_TO_FINISH",
@@ -108,7 +109,7 @@ class MissionPhaseManager:
         *,
         required_pickups: int = 2,
         required_shots: int = 2,
-        required_hurdles: int = 2,
+        required_hurdles: int = 3,
         required_ball_sections: int = 2,
         max_pickup_failures: int = 3,
         max_shot_failures: int = 3,
@@ -232,7 +233,13 @@ class MissionPhaseManager:
     def execution_limit_reached(self, action: str) -> bool:
         """Report whether the configured mission execution budget is exhausted."""
         fields = self.EXECUTION_COUNTERS.get(action)
-        return bool(fields and getattr(self, fields[0]) >= getattr(self, fields[1]))
+        if fields is None:
+            return False
+        limit = getattr(self, fields[1])
+        # The third hurdle mode is finish walking, never another jump.
+        if action == "GO":
+            limit = min(limit, 2)
+        return getattr(self, fields[0]) >= limit
 
     def _count_active_execution(self) -> None:
         """Count once per command, independently of its eventual result."""

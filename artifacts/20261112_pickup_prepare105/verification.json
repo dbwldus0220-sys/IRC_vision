@@ -1,0 +1,22 @@
+{
+  "baseline_tests": 445,
+  "baseline_passed": 349,
+  "baseline_failed": 96,
+  "updated_tests": 448,
+  "updated_passed": 352,
+  "updated_failed": 96,
+  "new_failures": [],
+  "resolved_failures": [],
+  "targeted_preparation_tests_passed": 130,
+  "sdk_queue_and_preparation_chains": "passed",
+  "sdk_pc_and_runtime_playback_1ms_and_jittered_ticks": "passed",
+  "nominal_duration_seconds": 0.939,
+  "catalog_validation": "3 tests passed",
+  "idempotent": true,
+  "catalog_changes": [
+    "n공에서 전진하고 후진준비자세"
+  ],
+  "aliases_changed": false,
+  "production_control_code_changed": false,
+  "hardware_executed": false
+}

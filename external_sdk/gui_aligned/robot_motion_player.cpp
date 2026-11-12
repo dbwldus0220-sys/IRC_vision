@@ -41,7 +41,7 @@ bool isLineWalkingMotion(std::string_view name) {
         || name.starts_with("t전진실전45도(") || name.starts_with("p전진45(")
         || name.starts_with("p전진45도(")
         || name.starts_with("n전진45도(") || name.starts_with("m전진45(")
-        || name.starts_with("j전진45(")
+        || name.starts_with("j전진45(") || name == "최종전진"
         || isLineRecoveryMotion(name);
 }
 bool isGoalForwardMotion(std::string_view name) {

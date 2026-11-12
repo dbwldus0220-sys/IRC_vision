@@ -435,6 +435,20 @@ private:
     const std::string action = json_object_object_get_ex(object, "action", &action_value) &&
       json_object_get_type(action_value) == json_type_string ?
       json_object_get_string(action_value) : "";
+    json_object * progress = nullptr;
+    json_object * required = nullptr;
+    json_object * completed = nullptr;
+    if (json_object_object_get_ex(object, "mission_progress", &progress) &&
+      json_object_get_type(progress) == json_type_object &&
+      json_object_object_get_ex(progress, "required_hurdles", &required) &&
+      json_object_get_type(required) == json_type_int &&
+      json_object_get_int(required) >= 3 &&
+      json_object_object_get_ex(progress, "hurdles_completed", &completed) &&
+      json_object_get_type(completed) == json_type_int &&
+      json_object_get_int(completed) >= 2)
+    {
+      finish_hurdle_head_suppressed_ = true;
+    }
     json_object_put(object);
     if (source == "ball") {
       if (!ball_control_active_) {
@@ -443,6 +457,13 @@ private:
       ball_control_active_ = true;
     } else if (valid && (source == "line" || source == "hurdle" || source == "goal")) {
       ball_control_active_ = false;
+    }
+    if (finish_hurdle_head_suppressed_) {
+      // The third near hurdle is a finish marker; retain ordinary walking gaze.
+      hurdle_control_active_ = false;
+      hurdle_line_monitor_active_ = false;
+      clear_hurdle_head_override();
+      return;
     }
     if (source == "hurdle" && (valid || phase == "HURDLE_POSITIONING")) {
       // A positioning WAIT may be waiting for fresh geometry after Line ended.
@@ -477,7 +498,7 @@ private:
   void handle_hurdle_info(const std::string & payload)
   {
     if (!enable_head_override_) {return;}
-    if (!hurdle_control_active_ || hurdle_head_override_latched_ ||
+    if (finish_hurdle_head_suppressed_ || !hurdle_control_active_ || hurdle_head_override_latched_ ||
       !startup_pose_gate_->navigation_allowed())
     {
       return;
@@ -884,6 +905,7 @@ private:
   bool hurdle_line_monitor_active_{false};
   bool hurdle_ignore_until_clear_{false};
   bool hurdle_head_override_latched_{false};
+  bool finish_hurdle_head_suppressed_{false};
   double hurdle_head_start_deg_{-33.0};
   double hurdle_head_current_deg_{-33.0};
   std::uint64_t hurdle_head_override_started_ms_{0};

@@ -15,7 +15,7 @@ def _geometry_analyzer() -> GoalAnalyzer:
     analyzer.depth_timeout_sec = 0.7
     analyzer.depth_window_px = 3
     analyzer.max_valid_depth_m = 6.0
-    analyzer.backboard_line_width_m = 0.155
+    analyzer.backboard_line_width_m = 0.17
     analyzer.backboard_sample_y_ratio = 0.18
     analyzer.backboard_edge_inset_ratio = 0.10
     analyzer.backboard_parallel_tolerance_deg = 3.0
@@ -52,10 +52,10 @@ def test_line_depths_are_sampled_at_same_height_and_scaled_to_depth_image():
     assert right == pytest.approx(0.6)
 
 
-def test_known_155mm_line_recovers_positive_right_far_angle():
+def test_known_170mm_line_recovers_positive_right_far_angle():
     analyzer = _geometry_analyzer()
     expected_angle = 20.0
-    sampled_width = 0.155
+    sampled_width = 0.17
     depth_delta = sampled_width * math.sin(math.radians(expected_angle))
     depths = (
         0.5 - depth_delta / 2.0,
@@ -143,7 +143,7 @@ def test_lateral_camera_mount_is_distance_dependent_not_fixed_angle():
 
 def test_goal_info_publishes_three_depths_and_relative_angle():
     analyzer, published = make_analyzer(depth_m=0.5)
-    sampled_width = 0.155
+    sampled_width = 0.17
     depth_delta = sampled_width * math.sin(math.radians(-15.0))
     points = [[576, 222], [640, 222], [704, 222]]
     analyzer._sample_backboard_line_depths = lambda *_args: (
@@ -156,16 +156,16 @@ def test_goal_info_publishes_three_depths_and_relative_angle():
 
     info = send(analyzer, published, [detection()])
 
-    assert info["left_depth_m"] == pytest.approx(0.5201)
+    assert info["left_depth_m"] == pytest.approx(0.5220)
     assert info["center_depth_m"] == pytest.approx(0.5)
-    assert info["right_depth_m"] == pytest.approx(0.4799)
+    assert info["right_depth_m"] == pytest.approx(0.4780)
     assert info["backboard_depth_sample_count"] == 3
     assert info["backboard_sample_points_px"] == points
     assert info["backboard_angle_deg"] == pytest.approx(-15.0)
     assert info["parallel_correction_deg"] == pytest.approx(15.0)
     assert info["backboard_angle_direction"] == "LEFT_FAR"
     assert info["backboard_angle_valid"] is True
-    assert info["backboard_line_width_m"] == pytest.approx(0.155)
+    assert info["backboard_line_width_m"] == pytest.approx(0.17)
     assert info["camera_to_waist_depth_offset_m"] == pytest.approx(0.10)
     assert info["camera_to_waist_lateral_offset_m"] == pytest.approx(0.030)
     assert info["waist_depth_m"] == pytest.approx(0.6)

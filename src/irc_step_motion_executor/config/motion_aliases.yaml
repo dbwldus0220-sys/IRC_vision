@@ -2,7 +2,7 @@
 # Retained left-turn selection: 1/2/3/4/5/6 repeats = 15/30/45/60/75/90 degrees.
 # Catalog77 p left-turn gait: retain command counts; re-measure actual yaw.
 # Stationary right-turn bins: 15/30/45/60/75/90+ degrees -> 1/3/5/6/7/9 repeats.
-# Catalog70 t right-turn gait: retain command counts; re-measure actual yaw.
+# Source103 t right-turn gait: retain command counts; re-measure actual yaw.
 # One/four-repeat turns use the same-camera two-repeat source gait.
 # The 45/0/90 in catalog names identifies the camera pose, not the yaw angle.
 # Visible-target alignment: left 8/30/45/60/75/90+ degrees -> 1/2/3/4/5/6 repeats.
@@ -15,7 +15,7 @@ motion_aliases:
   sdk_forward_4: "m전진45(4회)"
   line_forward_2: "m전진45(2회)"
   line_forward_4: "m전진45(4회)"
-  line_forward_6: "m전진45(6회)"
+  line_forward_6: "최종전진"
   line_forward_8: "m전진45(8회)"
   forward: "m전진45(8회)"
   line_turn_right_1: "t제자리우회전45도(1회)"
@@ -85,7 +85,7 @@ motion_aliases:
   pickup_camera_down_turn_right_7: "t제자리우회전0도(7회)"
   pickup_camera_down_turn_right_9: "t제자리우회전0도(9회)"
   post_ball_forward_4: "m전진45(4회)"
-  post_ball_forward_6: "m전진45(6회)"
+  post_ball_forward_6: "최종전진"
   post_shot_turn_right_9: "t제자리우회전45도(9회)"
   # Catalog70 exit composites preserve the source repeat_count=1.
   post_shot_default_turn_right: "t골대후제자리우회전"

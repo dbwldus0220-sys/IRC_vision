@@ -1,0 +1,9 @@
+{
+  "source_sha256": "3fede243ee21d48ae1a58eef5341bb74f0592f7af6c71e8b5b9d19ac766bcea6",
+  "replaced": [
+    "n공에서 전진하고 후진준비자세"
+  ],
+  "motion_id": "pickup_forward_to_backward_prepare",
+  "duration_sec": 0.939,
+  "completion": "Executor success, followed by the existing total 1-second hold before backward."
+}

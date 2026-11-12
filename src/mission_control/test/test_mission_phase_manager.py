@@ -32,7 +32,7 @@ def test_default_initial_state():
         "post_ball_goal_transition_failed": False,
         "required_pickups": 2,
         "required_shots": 2,
-        "required_hurdles": 2,
+        "required_hurdles": 3,
         "required_ball_sections": 2,
         "active_special_action": None,
         "active_special_command_id": None,
@@ -728,7 +728,8 @@ def test_hurdle_counter_counts_only_unique_successes(status):
     manager.handle_motion_status("GO", 2, "SUCCEEDED")
     assert manager.hurdles_completed == 1
     assert not manager.start_special_action("GO", 3)
-    assert manager.hurdles_executed == manager.required_hurdles == 2
+    assert manager.hurdles_executed == 2
+    assert manager.required_hurdles == 3
     assert manager.hurdles_completed == 1
     assert manager.current_phase == "LINE_TRACK"
     assert manager.pickups_completed == manager.shots_completed == 0
